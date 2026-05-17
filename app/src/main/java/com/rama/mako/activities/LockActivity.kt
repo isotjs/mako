@@ -7,6 +7,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.window.OnBackInvokedCallback
 import com.rama.mako.CsActivity
 import com.rama.mako.R
@@ -14,9 +15,17 @@ import com.rama.mako.R
 class LockActivity : CsActivity() {
 
     private lateinit var pinDisplay: EditText
+    private lateinit var easterEggText: TextView
+    private lateinit var easterEggCounter: TextView
     private lateinit var buttons: List<Button>
+    private lateinit var unlockButton: Button
 
     private val pinBuilder = StringBuilder()
+    private var unlockPressCount = 0
+    private var isEasterEggActive = false
+
+    private val easterEggThreshold = 32
+    private val easterEggCounterStart = 22
 
     private var backCallback: OnBackInvokedCallback? = null
 
@@ -42,6 +51,9 @@ class LockActivity : CsActivity() {
 
     private fun setupViews() {
         pinDisplay = findViewById(R.id.pin_display)
+        easterEggText = findViewById(R.id.easter_egg_text)
+        easterEggCounter = findViewById(R.id.easter_egg_counter)
+        unlockButton = findViewById(R.id.unlock_button)
 
         buttons = listOf(
             findViewById(R.id.btn0),
@@ -126,12 +138,35 @@ class LockActivity : CsActivity() {
         }
 
         findViewById<View>(R.id.unlock_button).setOnClickListener {
-            validatePin()
+            if (!isEasterEggActive) {
+                unlockPressCount++
+                if (unlockPressCount >= easterEggThreshold) {
+                    showEasterEgg()
+                } else if (unlockPressCount >= easterEggCounterStart) {
+                    showEasterEggCounter()
+                    validatePin()
+                } else {
+                    validatePin()
+                }
+            }
         }
 
         findViewById<View>(R.id.close_button).setOnClickListener {
             navigateToHome()
         }
+    }
+
+    private fun showEasterEgg() {
+        isEasterEggActive = true
+        easterEggText.visibility = View.VISIBLE
+        easterEggCounter.visibility = View.GONE
+        unlockButton.isEnabled = false
+    }
+
+    private fun showEasterEggCounter() {
+        val remaining = easterEggThreshold - unlockPressCount
+        easterEggCounter.text = getString(R.string.easter_eggs_counter, remaining)
+        easterEggCounter.visibility = View.VISIBLE
     }
 
     private fun validatePin() {
