@@ -78,6 +78,7 @@ class PrefsManager private constructor(context: Context) {
         const val SYSTEM_BAR_VISIBLE = "system:bar:visible"
 
         const val APP_THEME_NAME = "app:theme:name"
+        const val APP_THEME_H1 = "app:theme:clock"
         const val APP_THEME_FOREGROUND = "app:theme:foreground"
         const val APP_THEME_BG_1 = "app:theme:bg_1"
         const val APP_THEME_BG_2 = "app:theme:bg_2"
@@ -92,7 +93,6 @@ class PrefsManager private constructor(context: Context) {
         const val APP_THEME_DANGER = "app:theme:danger"
         const val APP_THEME_COLLAPSIBLE_HEADER = "app:theme:collapsible_header"
         const val APP_THEME_ICON = "app:theme:icon"
-        const val APP_THEME_CLOCK = "app:theme:clock"
 
         const val SECURITY_KEYPAD_VISIBLE = "security:keypad:visible"
         const val SECURITY_KEYPAD_RANDOMIZED = "security:keypad:randomized"
@@ -113,6 +113,8 @@ class PrefsManager private constructor(context: Context) {
         const val SETTINGS_SECTION_APPS = "settings:section:apps"
         const val SETTINGS_SECTION_SECURITY = "settings:section:apps"
         const val SETTINGS_SECTION_THEMES = "settings:section:themes"
+
+        const val APP_UI_SCALE = "app:ui_scale"
 
         fun appKey(pkg: String, userHandle: UserHandle): String {
             val userId = userHandle.hashCode()
@@ -205,6 +207,8 @@ class PrefsManager private constructor(context: Context) {
                 .putString(PrefKeys.CLOCK_APP, "")
                 .putString(PrefKeys.APP_LANGUAGE, Language.SYSTEM)
 
+                .putFloat(PrefKeys.APP_UI_SCALE, 1f)
+
                 .putBoolean(PrefKeys.APPS_ICONS, false)
                 .putBoolean(PrefKeys.APPS_SEARCH, false)
                 .putBoolean(PrefKeys.APPS_PROFILE_INDICATOR, true)
@@ -213,7 +217,7 @@ class PrefsManager private constructor(context: Context) {
                 .putString(PrefKeys.HOME_BACKGROUND_MODE, BackgroundMode.DEFAULT)
                 .putBoolean(PrefKeys.SYSTEM_BAR_VISIBLE, false)
 
-                .putString(PrefKeys.APP_THEME_NAME, Theme.MAKO)
+                .putString(PrefKeys.APP_THEME_NAME, Theme.DRACULA)
 
                 .putBoolean(PrefKeys.BATTERY_VISIBLE, true)
                 .putBoolean(PrefKeys.BATTERY_TEMPERATURE, true)
@@ -497,6 +501,13 @@ class PrefsManager private constructor(context: Context) {
     fun setAppLanguage(language: String) {
         prefs.edit().putString(PrefKeys.APP_LANGUAGE, language).apply()
     }
+
+    fun getUiScale(): Float =
+        prefs.getFloat(PrefKeys.APP_UI_SCALE, 1f)
+
+    fun setUiScale(scale: Float) =
+        prefs.edit().putFloat(PrefKeys.APP_UI_SCALE, scale)
+            .apply()
 
     // SECURITY - PIN (stored in EncryptedSharedPreferences)
 

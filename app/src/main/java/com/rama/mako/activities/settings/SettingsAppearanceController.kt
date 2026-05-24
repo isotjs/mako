@@ -2,7 +2,6 @@ package com.rama.mako.activities.settings
 
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.view.View
 import android.widget.RadioGroup
@@ -16,6 +15,7 @@ import com.rama.mako.managers.ThemeManager
 import java.io.File
 import java.io.FileOutputStream
 import com.rama.mako.widgets.WdColorPicker
+import com.rama.mako.widgets.WdRange
 
 class SettingsAppearanceController(private val activity: SettingsActivity) {
 
@@ -27,6 +27,7 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
         setupTheme()
         setupCustomTheme()
         setupBackgroundMode()
+        setupUiScale()
     }
 
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -179,14 +180,11 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
         }
     }
 
-    private fun colorToHex(color: Int): String =
-        String.format("#%06X", 0xFFFFFF and color)
-
     private fun populateCustomFields(palette: ThemeManager.Palette) {
         activity.findViewById<WdColorPicker>(R.id.foreground).setColor(palette.foreground)
         activity.findViewById<WdColorPicker>(R.id.collapsible_header)
             .setColor(palette.collapsible_header)
-        activity.findViewById<WdColorPicker>(R.id.clock).setColor(palette.clock)
+        activity.findViewById<WdColorPicker>(R.id.h1).setColor(palette.h1)
         activity.findViewById<WdColorPicker>(R.id.icons).setColor(palette.icon)
         activity.findViewById<WdColorPicker>(R.id.accent).setColor(palette.accent_1)
         activity.findViewById<WdColorPicker>(R.id.bg_2).setColor(palette.bg_2)
@@ -196,12 +194,6 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
         activity.findViewById<WdColorPicker>(R.id.btn_1).setColor(palette.button_1)
         activity.findViewById<WdColorPicker>(R.id.btn_2).setColor(palette.button_2)
         activity.findViewById<WdColorPicker>(R.id.danger).setColor(palette.danger)
-    }
-
-    private fun parseHex(text: String): Int? {
-        val hex = text.trim()
-        if (!hex.matches(Regex("^#[0-9A-Fa-f]{6}$"))) return null
-        return runCatching { Color.parseColor(hex) }.getOrNull()
     }
 
     private fun setupCustomTheme() {
@@ -216,7 +208,7 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
                 PrefsManager.PrefKeys.APP_THEME_COLLAPSIBLE_HEADER to activity.findViewById<WdColorPicker>(
                     R.id.collapsible_header
                 ),
-                PrefsManager.PrefKeys.APP_THEME_CLOCK to activity.findViewById<WdColorPicker>(R.id.clock),
+                PrefsManager.PrefKeys.APP_THEME_H1 to activity.findViewById<WdColorPicker>(R.id.h1),
                 PrefsManager.PrefKeys.APP_THEME_ICON to activity.findViewById<WdColorPicker>(R.id.icons),
                 PrefsManager.PrefKeys.APP_THEME_ACCENT_1 to activity.findViewById<WdColorPicker>(R.id.accent),
                 PrefsManager.PrefKeys.APP_THEME_BG_1 to activity.findViewById<WdColorPicker>(R.id.bg_1),
@@ -253,6 +245,29 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
 
             prefs.setHomeBackgroundMode(mode)
             activity.applySettingsBackground()
+        }
+    }
+
+    private fun setupUiScale() {
+        val range = activity.findViewById<WdRange>(R.id.zoom)
+
+        val savedScale = prefs.getUiScale()
+
+        range.onValueChanged = { value ->
+            val scale = value.toFloatOrNull() ?: 1f
+            if (scale != prefs.getUiScale()) {
+                prefs.setUiScale(scale)
+                activity.recreate()
+            }
+        }
+
+        val steps = activity.resources.getStringArray(R.array.ui_scale_steps).toList()
+        val matchIndex = steps.indexOfFirst { it.toFloatOrNull() == savedScale }
+        if (matchIndex >= 0) {
+            range.post {
+                val container = range.findViewById<android.widget.LinearLayout>(R.id.container)
+                (container?.getChildAt(matchIndex) as? android.widget.Button)?.performClick()
+            }
         }
     }
 }
