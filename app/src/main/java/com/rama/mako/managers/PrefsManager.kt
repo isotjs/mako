@@ -77,6 +77,7 @@ class PrefsManager private constructor(context: Context) {
         const val APP_LANGUAGE = "app:language"
         const val MIGRATION_ICON_SOURCE_RADIO = "migration:icon_source_radio"
         const val SYSTEM_BAR_VISIBLE = "system:bar:visible"
+        const val SYSTEM_PREVENT_ROTATION = "system:prevent_rotation"
 
         const val APP_THEME_NAME = "app:theme:name"
         const val APP_THEME_H1 = "app:theme:clock"
@@ -218,6 +219,7 @@ class PrefsManager private constructor(context: Context) {
                 .putString(PrefKeys.HOME_BACKGROUND_MODE, BackgroundMode.DEFAULT)
                 .putInt(PrefKeys.HOME_BACKGROUND_MODE_SCREEN_OPACITY_STRENGTH, 9)
                 .putBoolean(PrefKeys.SYSTEM_BAR_VISIBLE, false)
+                .putBoolean(PrefKeys.SYSTEM_PREVENT_ROTATION, false)
 
                 .putString(PrefKeys.APP_THEME_NAME, Theme.DRACULA)
 

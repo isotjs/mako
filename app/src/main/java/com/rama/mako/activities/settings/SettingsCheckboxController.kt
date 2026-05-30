@@ -2,6 +2,7 @@ package com.rama.mako.activities.settings
 
 import android.view.View
 import com.rama.mako.R
+import com.rama.mako.activities.MainActivity
 import com.rama.mako.activities.SettingsActivity
 import com.rama.mako.managers.PrefsManager.PrefKeys
 import com.rama.mako.widgets.WdCheckbox
@@ -36,6 +37,14 @@ class SettingsCheckboxController(private val activity: SettingsActivity) {
         bindWdCheckbox(R.id.show_battery_temperature, PrefKeys.BATTERY_TEMPERATURE, false)
         bindWdCheckbox(R.id.show_battery_charge_status, PrefKeys.BATTERY_CHARGE_STATUS, false)
         bindWdCheckbox(R.id.show_system_bar, PrefKeys.SYSTEM_BAR_VISIBLE, false)
+        bindWdCheckbox(
+            R.id.prevent_home_screen_rotation,
+            PrefKeys.SYSTEM_PREVENT_ROTATION,
+            false,
+            onChange = { isChecked ->
+                activity.applyRotationLock(isChecked)
+            }
+        )
         bindWdCheckbox(R.id.show_profile_indicator, PrefKeys.APPS_PROFILE_INDICATOR, true)
 
         bindWdCheckbox(
@@ -49,6 +58,7 @@ class SettingsCheckboxController(private val activity: SettingsActivity) {
             PrefKeys.SECURITY_KEYPAD_RANDOMIZED,
             true,
         )
+
     }
 
     private fun bindWdCheckbox(

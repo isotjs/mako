@@ -109,6 +109,7 @@
     <string name="checkbox_show_group_header">Show group header</string>
     <string name="checkbox_randomized_keypad">Randomized keypad</string>
     <string name="checkbox_always_show_search_bar">Always visible</string>
+    <string name="checkbox_prevent_home_screen_rotation">Lock screen rotation</string>
 
     <!-- ContextMenu -->
     <string name="ctxmenu_rename_app">Rename app...</string>

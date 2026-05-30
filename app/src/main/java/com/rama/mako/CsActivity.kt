@@ -2,6 +2,7 @@ package com.rama.mako
 
 import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -89,6 +90,8 @@ abstract class CsActivity : Activity() {
             return
         }
 
+        applyRotationLock(prefs.getBoolean(PrefsManager.PrefKeys.SYSTEM_PREVENT_ROTATION, false))
+
         val root = findViewById<View>(android.R.id.content)
         ThemeManager.applyTheme(this, root)
     }
@@ -129,6 +132,14 @@ abstract class CsActivity : Activity() {
         if (hasFocus) {
             val root = findViewById<View>(android.R.id.content)
             updateSystemBars(root)
+        }
+    }
+
+    fun applyRotationLock(lock: Boolean) {
+        requestedOrientation = if (lock) {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
 

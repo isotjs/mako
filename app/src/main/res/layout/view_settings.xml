@@ -49,6 +49,11 @@
                     android:text="@string/checkbox_show_system_bar"
                     style="@style/Checkbox" />
 
+                <com.rama.mako.widgets.WdCheckbox
+                    android:id="@+id/prevent_home_screen_rotation"
+                    android:text="@string/checkbox_prevent_home_screen_rotation"
+                    style="@style/Checkbox" />
+
                 <LinearLayout style="@style/VerticalListDivided_BG2">
 
                     <TextView
