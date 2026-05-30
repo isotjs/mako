@@ -58,8 +58,9 @@ class PrefsManager private constructor(context: Context) {
         const val APPS_ICON_PACK_PACKAGE = "apps:icon_pack_package"
         const val APPS_PROFILE_INDICATOR = "apps:profile_indicator"
 
-        //        const val APPS_SHOW_HIDDEN = "apps:show_hidden"
         const val HOME_BACKGROUND_MODE = "home:background_mode"
+        const val HOME_BACKGROUND_MODE_SCREEN_OPACITY_STRENGTH =
+            "home:background_mode:screen_opacity_strength"
         const val GROUPS_IDS = "groups:ids"
         const val GROUPS_HEADERS = "groups:headers"
         const val GROUPS_COLLAPSIBLE = "groups:collapsible"
@@ -215,6 +216,7 @@ class PrefsManager private constructor(context: Context) {
                 .putString(PrefKeys.APPS_ICON_SOURCE, IconSource.NONE)
                 .putString(PrefKeys.APPS_ICON_PACK_PACKAGE, "")
                 .putString(PrefKeys.HOME_BACKGROUND_MODE, BackgroundMode.DEFAULT)
+                .putInt(PrefKeys.HOME_BACKGROUND_MODE_SCREEN_OPACITY_STRENGTH, 9)
                 .putBoolean(PrefKeys.SYSTEM_BAR_VISIBLE, false)
 
                 .putString(PrefKeys.APP_THEME_NAME, Theme.DRACULA)
@@ -235,6 +237,7 @@ class PrefsManager private constructor(context: Context) {
 
                 .putBoolean(PrefKeys.SETTINGS_SECTION_CLOCK, true)
                 .putBoolean(PrefKeys.SETTINGS_SECTION_TEMPERATURE, true)
+
                 .putBoolean(PrefKeys.SETTINGS_SECTION_BACKGROUND, true)
                 .putBoolean(PrefKeys.SETTINGS_SECTION_DATE, true)
                 .putBoolean(PrefKeys.SETTINGS_SECTION_BATTERY, true)
@@ -453,6 +456,14 @@ class PrefsManager private constructor(context: Context) {
     // SETTINGS - FONT
 
     // SETTINGS - BACKGROUND
+
+    fun getHomeBackgroundScreenOpacityStrength(): Int {
+        return prefs.getInt(PrefKeys.HOME_BACKGROUND_MODE_SCREEN_OPACITY_STRENGTH, 9)
+    }
+
+    fun setHomeBackgroundScreenOpacityStrength(strength: Int) {
+        prefs.edit().putInt(PrefKeys.HOME_BACKGROUND_MODE_SCREEN_OPACITY_STRENGTH, strength).apply()
+    }
 
     fun getHomeBackgroundMode(): String {
         return when (prefs.getString(PrefKeys.HOME_BACKGROUND_MODE, BackgroundMode.DEFAULT)) {

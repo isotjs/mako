@@ -117,6 +117,7 @@
 
     <!-- InputLabel -->
     <string name="label_zoom">Zoom</string>
+    <string name="label_screen_opacity_strength">Screen opacity strength</string>
 
     <!-- InputHints -->
     <string name="hint_search_apps">Search apps...</string>

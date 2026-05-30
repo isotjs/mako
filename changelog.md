@@ -1,5 +1,8 @@
 # Changelog
 
+## 41
+- Screen opacity control
+
 ## 40
 - Add zoom control
 - Prevent non letter for been the initial of the profiles

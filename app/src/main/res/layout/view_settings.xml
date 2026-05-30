@@ -222,6 +222,7 @@
                     </LinearLayout>
                 </LinearLayout>
             </com.rama.mako.widgets.WdCollapsibleSection>
+
             <!--Background-->
             <com.rama.mako.widgets.WdCollapsibleSection
                 android:layout_width="match_parent"
@@ -234,6 +235,18 @@
                     android:id="@+id/home_background_wallpaper"
                     android:text="@string/radio_background_wallpaper"
                     style="@style/Checkbox" />
+
+                <LinearLayout style="@style/VerticalListDivided_BG2">
+
+                    <TextView
+                        android:text="@string/label_screen_opacity_strength"
+                        style="@style/Text" />
+
+                    <com.rama.mako.widgets.WdRange
+                        android:id="@+id/screen_opacity"
+                        app:valuesArray="@array/wallpaper_screen_opacity_strength"
+                        style="@style/BlockFlow" />
+                </LinearLayout>
 
                 <Button
                     android:id="@+id/wallpaper_button"

@@ -27,6 +27,7 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
         setupTheme()
         setupCustomTheme()
         setupBackgroundMode()
+        setupScreenOpacity()
         setupUiScale()
     }
 
@@ -245,6 +246,30 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
 
             prefs.setHomeBackgroundMode(mode)
             activity.applySettingsBackground()
+        }
+    }
+
+    private fun setupScreenOpacity() {
+        val range = activity.findViewById<WdRange>(R.id.screen_opacity)
+
+        val steps =
+            activity.resources.getStringArray(R.array.wallpaper_screen_opacity_strength).toList()
+        val savedStrength = prefs.getHomeBackgroundScreenOpacityStrength()
+        val matchIndex = steps.indexOfFirst { it.toIntOrNull() == savedStrength }
+
+        if (matchIndex >= 0) {
+            range.post {
+                val container = range.findViewById<android.widget.LinearLayout>(R.id.container)
+                (container?.getChildAt(matchIndex) as? android.widget.Button)?.performClick()
+            }
+        }
+
+        range.onValueChanged = { value ->
+            val strength = value.toIntOrNull()
+            if (strength != null && strength != prefs.getHomeBackgroundScreenOpacityStrength()) {
+                prefs.setHomeBackgroundScreenOpacityStrength(strength)
+                activity.applySettingsBackground()
+            }
         }
     }
 
