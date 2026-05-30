@@ -233,17 +233,16 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
 
     private fun setupBackgroundMode() {
         val checkbox = activity.findViewById<WdCheckbox>(R.id.home_background_wallpaper)
+        val opacityContainer = activity.findViewById<View>(R.id.screen_opacity_container)
 
-        val initialMode = prefs.getHomeBackgroundMode()
-        checkbox.setChecked(initialMode == PrefsManager.BackgroundMode.WALLPAPER)
+        val isWallpaper = prefs.getHomeBackgroundMode() == PrefsManager.BackgroundMode.WALLPAPER
+        checkbox.setChecked(isWallpaper)
+        opacityContainer.visibility = if (isWallpaper) View.VISIBLE else View.GONE
 
         checkbox.setOnCheckedChangeListener { isChecked ->
-            val mode = if (isChecked) {
-                PrefsManager.BackgroundMode.WALLPAPER
-            } else {
-                PrefsManager.BackgroundMode.DEFAULT
-            }
-
+            opacityContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
+            val mode =
+                if (isChecked) PrefsManager.BackgroundMode.WALLPAPER else PrefsManager.BackgroundMode.DEFAULT
             prefs.setHomeBackgroundMode(mode)
             activity.applySettingsBackground()
         }
@@ -268,7 +267,7 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
             val strength = value.toIntOrNull()
             if (strength != null && strength != prefs.getHomeBackgroundScreenOpacityStrength()) {
                 prefs.setHomeBackgroundScreenOpacityStrength(strength)
-                activity.applySettingsBackground()
+                activity.applySettingsBackground(force = true)
             }
         }
     }

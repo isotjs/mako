@@ -49,7 +49,7 @@ class SettingsActivity : CsActivity() {
         applyCurrentTheme(settingsRootView)
 
         homeBackgroundManager = HomeBackgroundManager(this)
-        applySettingsBackground(force = true)
+        applySettingsBackground()
 
         appsProvider = AppsProvider(this)
         iconManager = IconManager(this, appsProvider)
@@ -93,7 +93,7 @@ class SettingsActivity : CsActivity() {
 
     fun applySettingsBackground(force: Boolean = false) {
         val mode = prefs.getHomeBackgroundMode()
-        val wallpaperSignature = null
+        val wallpaperSignature = homeBackgroundManager.getWallpaperSignature()
 
         if (!force &&
             mode == lastAppliedBackgroundMode &&

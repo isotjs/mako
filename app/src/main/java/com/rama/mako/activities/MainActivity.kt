@@ -279,7 +279,7 @@ class MainActivity : CsActivity() {
 
     override fun onResume() {
         super.onResume()
-        applyHomeBackground()
+        applyHomeBackground(force = true)
         unregisterWallpaperReceiverIfNeeded()
         syncSettings()
         schedulePostResumeRefresh()
@@ -369,7 +369,7 @@ class MainActivity : CsActivity() {
 
     private fun applyHomeBackground(force: Boolean = false) {
         val mode = prefs.getHomeBackgroundMode()
-        val wallpaperSignature = null
+        val wallpaperSignature = homeBackgroundManager.getWallpaperSignature()
 
         if (!force && mode == lastAppliedBackgroundMode && wallpaperSignature == lastAppliedWallpaperSignature) {
             return

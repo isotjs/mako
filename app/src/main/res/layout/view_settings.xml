@@ -236,7 +236,9 @@
                     android:text="@string/radio_background_wallpaper"
                     style="@style/Checkbox" />
 
-                <LinearLayout style="@style/VerticalListDivided_BG2">
+                <LinearLayout
+                    android:id="@+id/screen_opacity_container"
+                    style="@style/VerticalListDivided_BG2">
 
                     <TextView
                         android:text="@string/label_screen_opacity_strength"

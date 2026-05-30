@@ -29,10 +29,8 @@ class HomeBackgroundManager(context: Context) {
 
     fun createWallpaperOverlayDrawable(): Drawable {
         val strength = prefs.getHomeBackgroundScreenOpacityStrength() // 0..9
-        // strength 0 → fully transparent (0x00), strength 9 → 0x99 (≈60%)
-        val alpha = (strength * 0x99) / 9          // 0x99 = 153
-        val color = ColorUtils.setAlphaComponent(Color.BLACK, alpha)
-        return ColorDrawable(color)
+        val alpha = (strength * 0x99) / 9
+        return ColorDrawable(ColorUtils.setAlphaComponent(Color.BLACK, alpha))
     }
 
     fun createBackgroundDrawable(mode: String): Drawable {
@@ -48,8 +46,11 @@ class HomeBackgroundManager(context: Context) {
         }
     }
 
-    private fun supportsWallpaperReactiveBackground(): Boolean {
-        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1
+    fun getWallpaperSignature(): Int? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return null
+        return runCatching {
+            wallpaperManager.getWallpaperId(WallpaperManager.FLAG_SYSTEM)
+        }.getOrNull()
     }
 
     private fun darkenForReadability(color: Int): Int {
