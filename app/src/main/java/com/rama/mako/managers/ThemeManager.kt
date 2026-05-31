@@ -86,6 +86,28 @@ object ThemeManager {
         h1 = 0xFFCBA6F7.toInt(),
     )
 
+    private val CATPPUCCIN_LATTE = Palette(
+        foreground = 0xFF4C4F69.toInt(),
+        bg_1 = 0xFFEFF1F5.toInt(),
+        bg_2 = 0xFFCCD0DA.toInt(),
+        bg_3 = 0xFFBCC0CC.toInt(),
+
+        accent_1 = 0xFF40A02B.toInt(), // green
+        accent_2 = 0xFFDF8E1D.toInt(), // yellow
+        accent_3 = 0xFFFE640B.toInt(), // orange
+
+        disabled = 0xFF9CA0B0.toInt(),
+        input = 0xFFE6E9EF.toInt(),
+
+        button_1 = 0xFF1E66F5.toInt(), // blue
+        button_2 = 0xFF04A5E5.toInt(), // sky
+
+        danger = 0xFFD20F39.toInt(),
+        collapsible_header = 0xFF7287FD.toInt(),
+        icon = 0xFF4C4F69.toInt(),
+        h1 = 0xFF8839EF.toInt()
+    )
+
 
     // Dracula
     private val DRACULA = Palette(
@@ -148,6 +170,7 @@ object ThemeManager {
         when (theme) {
             PrefsManager.Theme.RAMA -> RAMA
             PrefsManager.Theme.CATPPUCCIN_MOCHA -> CATPPUCCIN_MOCHA
+            PrefsManager.Theme.CATPPUCCIN_LATTE -> CATPPUCCIN_LATTE
             PrefsManager.Theme.DRACULA -> DRACULA
             PrefsManager.Theme.MELANGE -> MELANGE
             PrefsManager.Theme.TOKYO_NIGHT -> TOKYO_NIGHT
@@ -261,67 +284,67 @@ object ThemeManager {
 
         return when (color) {
             // bg_primary
-            MAKO.bg_1, RAMA.bg_1, CATPPUCCIN_MOCHA.bg_1,
+            MAKO.bg_1, RAMA.bg_1, CATPPUCCIN_MOCHA.bg_1, CATPPUCCIN_LATTE.bg_1,
             DRACULA.bg_1, MELANGE.bg_1, TOKYO_NIGHT.bg_1, custom.bg_1,
             context.resources.getColor(R.color.bg_1) -> palette.bg_1
 
             // bg_secondary
-            MAKO.bg_2, RAMA.bg_2, CATPPUCCIN_MOCHA.bg_2,
+            MAKO.bg_2, RAMA.bg_2, CATPPUCCIN_MOCHA.bg_2, CATPPUCCIN_LATTE.bg_2,
             DRACULA.bg_2, MELANGE.bg_2, TOKYO_NIGHT.bg_2, custom.bg_2,
             context.resources.getColor(R.color.bg_2) -> palette.bg_2
 
             // bg_tertiary
-            MAKO.bg_3, RAMA.bg_3, CATPPUCCIN_MOCHA.bg_3,
+            MAKO.bg_3, RAMA.bg_3, CATPPUCCIN_MOCHA.bg_3, CATPPUCCIN_LATTE.bg_3,
             DRACULA.bg_3, MELANGE.bg_3, TOKYO_NIGHT.bg_3, custom.bg_3,
             context.resources.getColor(R.color.bg_3) -> palette.bg_3
 
             // button_primary
-            MAKO.button_1, RAMA.button_1, CATPPUCCIN_MOCHA.button_1,
+            MAKO.button_1, RAMA.button_1, CATPPUCCIN_MOCHA.button_1, CATPPUCCIN_LATTE.button_1,
             DRACULA.button_1, MELANGE.button_1, TOKYO_NIGHT.button_1, custom.button_1,
             context.resources.getColor(R.color.button_1) -> palette.button_1
 
             // button_secondary
-            MAKO.button_2, RAMA.button_2, CATPPUCCIN_MOCHA.button_2,
+            MAKO.button_2, RAMA.button_2, CATPPUCCIN_MOCHA.button_2, CATPPUCCIN_LATTE.button_2,
             DRACULA.button_2, MELANGE.button_2, TOKYO_NIGHT.button_2, custom.button_2,
             context.resources.getColor(R.color.button_2) -> palette.button_2
 
             // button_danger
-            MAKO.danger, RAMA.danger, CATPPUCCIN_MOCHA.danger,
+            MAKO.danger, RAMA.danger, CATPPUCCIN_MOCHA.danger, CATPPUCCIN_LATTE.danger,
             DRACULA.danger, MELANGE.danger, TOKYO_NIGHT.danger, custom.danger,
             context.resources.getColor(R.color.danger) -> palette.danger
 
             // input
-            MAKO.input, RAMA.input, CATPPUCCIN_MOCHA.input,
+            MAKO.input, RAMA.input, CATPPUCCIN_MOCHA.input, CATPPUCCIN_LATTE.input,
             DRACULA.input, MELANGE.input, TOKYO_NIGHT.input, custom.input,
             context.resources.getColor(R.color.input) -> palette.input
 
             // disabled
-            MAKO.disabled, RAMA.disabled, CATPPUCCIN_MOCHA.disabled,
+            MAKO.disabled, RAMA.disabled, CATPPUCCIN_MOCHA.disabled, CATPPUCCIN_LATTE.disabled,
             DRACULA.disabled, MELANGE.disabled, TOKYO_NIGHT.disabled, custom.disabled,
             context.resources.getColor(R.color.disabled) -> palette.disabled
 
             // accent_1
-            MAKO.accent_1, RAMA.accent_1, CATPPUCCIN_MOCHA.accent_1,
+            MAKO.accent_1, RAMA.accent_1, CATPPUCCIN_MOCHA.accent_1, CATPPUCCIN_LATTE.accent_1,
             DRACULA.accent_1, MELANGE.accent_1, TOKYO_NIGHT.accent_1, custom.accent_1,
             context.resources.getColor(R.color.accent_1) -> palette.accent_1
 
             // collapsible_header
-            MAKO.collapsible_header, RAMA.collapsible_header, CATPPUCCIN_MOCHA.collapsible_header,
+            MAKO.collapsible_header, RAMA.collapsible_header, CATPPUCCIN_MOCHA.collapsible_header, CATPPUCCIN_LATTE.collapsible_header,
             DRACULA.collapsible_header, MELANGE.collapsible_header, TOKYO_NIGHT.collapsible_header, custom.collapsible_header,
             context.resources.getColor(R.color.collapsible_header) -> palette.collapsible_header
 
             // icon
-            MAKO.icon, RAMA.icon, CATPPUCCIN_MOCHA.icon,
+            MAKO.icon, RAMA.icon, CATPPUCCIN_MOCHA.icon, CATPPUCCIN_LATTE.icon,
             DRACULA.icon, MELANGE.icon, TOKYO_NIGHT.icon, custom.icon,
             context.resources.getColor(R.color.icon) -> palette.icon
 
             // h1
-            MAKO.h1, RAMA.h1, CATPPUCCIN_MOCHA.h1,
+            MAKO.h1, RAMA.h1, CATPPUCCIN_MOCHA.h1, CATPPUCCIN_LATTE.h1,
             DRACULA.h1, MELANGE.h1, TOKYO_NIGHT.h1, custom.h1,
             context.resources.getColor(R.color.h1) -> palette.h1
 
             // foreground
-            MAKO.foreground, RAMA.foreground, CATPPUCCIN_MOCHA.foreground,
+            MAKO.foreground, RAMA.foreground, CATPPUCCIN_MOCHA.foreground, CATPPUCCIN_LATTE.foreground,
             DRACULA.foreground, MELANGE.foreground, TOKYO_NIGHT.foreground, custom.foreground,
             context.resources.getColor(R.color.foreground) -> palette.foreground
 

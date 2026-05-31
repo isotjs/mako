@@ -127,6 +127,11 @@
                         style="@style/Radio" />
 
                     <RadioButton
+                        android:id="@+id/theme_catppuccin_latte"
+                        android:text="@string/product_catppuccin_latte_name"
+                        style="@style/Radio" />
+
+                    <RadioButton
                         android:id="@+id/theme_dracula"
                         android:text="@string/product_dracula_name"
                         style="@style/Radio" />

@@ -173,6 +173,7 @@
     <string name="product_dracula_url" translatable="false">github.com/dracula</string>
     <string name="product_catppuccin_creator" translatable="false">Pocco</string>
     <string name="product_catppuccin_name" translatable="false">Catppuccin Moccha</string>
+    <string name="product_catppuccin_latte_name" translatable="false">Catppuccin Latte</string>
     <string name="product_catppuccin_url" translatable="false">github.com/catppuccin</string>
     <string name="product_tokyo_creator" translatable="false">Enkia</string>
     <string name="product_tokyo_name" translatable="false">Tokyo Night</string>

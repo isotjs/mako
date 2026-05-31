@@ -145,6 +145,7 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
             PrefsManager.Theme.RAMA -> group.check(R.id.theme_rama)
             PrefsManager.Theme.MAKO -> group.check(R.id.theme_mako)
             PrefsManager.Theme.CATPPUCCIN_MOCHA -> group.check(R.id.theme_catppuccin_mocha)
+            PrefsManager.Theme.CATPPUCCIN_LATTE -> group.check(R.id.theme_catppuccin_latte)
             PrefsManager.Theme.DRACULA -> group.check(R.id.theme_dracula)
             PrefsManager.Theme.MELANGE -> group.check(R.id.theme_melange)
             PrefsManager.Theme.TOKYO_NIGHT -> group.check(R.id.theme_tokyo_night)
@@ -157,6 +158,7 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
                 R.id.theme_rama -> PrefsManager.Theme.RAMA
                 R.id.theme_mako -> PrefsManager.Theme.MAKO
                 R.id.theme_catppuccin_mocha -> PrefsManager.Theme.CATPPUCCIN_MOCHA
+                R.id.theme_catppuccin_latte -> PrefsManager.Theme.CATPPUCCIN_LATTE
                 R.id.theme_dracula -> PrefsManager.Theme.DRACULA
                 R.id.theme_melange -> PrefsManager.Theme.MELANGE
                 R.id.theme_tokyo_night -> PrefsManager.Theme.TOKYO_NIGHT
