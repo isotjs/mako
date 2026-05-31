@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -29,8 +28,6 @@ abstract class CsActivity : Activity() {
         val scale = PrefsManager.getInstance(localeContext).getUiScale()
 
         val context = if (scale != 1f) {
-            // createConfigurationContext derives densityDpi from the *base* context
-            // each time, so there is no compounding across recreate() calls.
             val config = Configuration(localeContext.resources.configuration)
             config.densityDpi = (localeContext.resources.displayMetrics.densityDpi * scale).toInt()
             localeContext.createConfigurationContext(config)
@@ -93,6 +90,7 @@ abstract class CsActivity : Activity() {
 
         val root = findViewById<View>(android.R.id.content)
         ThemeManager.applyTheme(this, root)
+        applyWindowBackground()
     }
 
     fun refreshFont() {
@@ -106,14 +104,15 @@ abstract class CsActivity : Activity() {
         applyNavBarColor()
     }
 
+    fun applyWindowBackground() {
+        val palette = ThemeManager.paletteFor(prefs.getTheme(), this)
+        window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(palette.bg_1))
+    }
+
     protected fun applyNavBarColor() {
         val palette = ThemeManager.paletteFor(prefs.getTheme(), this)
-        if (prefs.getHomeBackgroundMode() == PrefsManager.BackgroundMode.WALLPAPER) {
-            window.navigationBarColor = Color.TRANSPARENT
-        } else {
-            window.navigationBarColor = palette.bg_1
-            window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(palette.bg_1))
-        }
+        window.navigationBarColor = palette.bg_1
     }
 
     protected fun updateSystemBars(root: View) {

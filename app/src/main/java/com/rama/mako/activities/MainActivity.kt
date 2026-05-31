@@ -101,29 +101,24 @@ class MainActivity : CsActivity() {
         rootView.requestFocus()
         val palette = ThemeManager.paletteFor(prefs.getTheme())
 
-        // --- Prefs ---
         homeBackgroundManager = HomeBackgroundManager(this)
         applyHomeBackground(force = true)
 
-        // --- Views ---
         timeText = findViewById(R.id.time)
         dateText = findViewById(R.id.date)
         batteryText = findViewById(R.id.battery)
         listView = findViewById(R.id.app_list)
 
-        // --- Clock ---
-        clockManager = ClockManager(timeText, dateText, this) // now uses PrefsManager internally
+        clockManager = ClockManager(timeText, dateText, this)
         clockManager.start()
         timeText.setOnClickListener { openSystemClock() }
 
-        // --- Battery ---
         batteryManager = BatteryManager(
             context = this,
             callback = { status -> batteryText.text = status },
         )
         batteryManager.register()
 
-        // --- App List ---
         appsProvider = AppsProvider(this)
         appListManager = AppListManager(
             this,
@@ -148,23 +143,17 @@ class MainActivity : CsActivity() {
         setupBackHandling()
     }
 
-    // --- OnBackInvokedCallback registor for Android 13+ ---
-
     private fun setupBackHandling() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             backCallback = OnBackInvokedCallback {
-                // If search is always visible, loose focus and collapse keyboard
                 if (isSearchBarAlwaysVisible) {
                     searchField.clearFocus()
                     val imm =
                         getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
                     imm.hideSoftInputFromWindow(searchField.windowToken, 0)
-                }
-                // If search is expanded, collapse it; otherwise consume back to prevent launcher restart
-                else if (isSearchExpanded) {
+                } else if (isSearchExpanded) {
                     collapseSearch()
                 }
-                // Else, do nothing (consume back to keep launcher open)
             }
             onBackInvokedDispatcher.registerOnBackInvokedCallback(
                 android.window.OnBackInvokedDispatcher.PRIORITY_OVERLAY,
@@ -178,11 +167,9 @@ class MainActivity : CsActivity() {
         searchIcon = findViewById(R.id.search_icon)
         clearBtn = findViewById(R.id.clear_field)
 
-        // Initially collapsed
         searchField.visibility = View.GONE
         clearBtn.visibility = View.GONE
 
-        // Search icon
         searchIcon.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
 
@@ -193,7 +180,6 @@ class MainActivity : CsActivity() {
             }
         }
 
-        // Text change with debounce
         searchField.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -201,24 +187,20 @@ class MainActivity : CsActivity() {
 
                 val query = s.toString()
 
-                // Cancel previous debounce
                 searchDebounceRunnable?.let { searchDebounceHandler.removeCallbacks(it) }
 
-                // Schedule new after 300ms
                 searchDebounceRunnable = Runnable {
                     currentSearchQuery = query
                     appListManager.filter(currentSearchQuery)
                 }
                 searchDebounceHandler.postDelayed(searchDebounceRunnable!!, 300)
 
-                // Clear button
                 clearBtn.visibility = if (query.isNotEmpty()) View.VISIBLE else View.GONE
             }
 
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
-        // Clear button (resets the list too)
         clearBtn.setOnClickListener {
             currentSearchQuery = ""
             searchDebounceRunnable?.let { searchDebounceHandler.removeCallbacks(it) }
@@ -233,7 +215,6 @@ class MainActivity : CsActivity() {
     private fun expandSearch() {
         isSearchExpanded = true
 
-        // Show field
         searchField.visibility = View.VISIBLE
         if (!isSearchBarAlwaysVisible)
             searchField.requestFocus()
@@ -249,7 +230,6 @@ class MainActivity : CsActivity() {
             start()
         }
 
-        // Show keyboard
         val imm =
             getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
         imm.showSoftInput(searchField, 0)
@@ -258,7 +238,6 @@ class MainActivity : CsActivity() {
     private fun collapseSearch(clearQuery: Boolean = true, hideKeyboard: Boolean = true) {
         isSearchExpanded = false
 
-        // Hide field
         searchField.visibility = View.GONE
         clearBtn.visibility = View.GONE
         searchField.clearFocus()
@@ -301,10 +280,8 @@ class MainActivity : CsActivity() {
         unregisterWallpaperReceiverIfNeeded()
         clearPendingResumeRefresh()
 
-        // Clean up debounce handler
         searchDebounceRunnable?.let { searchDebounceHandler.removeCallbacks(it) }
 
-        // Unregister back callback for Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && backCallback != null) {
             onBackInvokedDispatcher.unregisterOnBackInvokedCallback(backCallback!!)
         }
@@ -314,22 +291,16 @@ class MainActivity : CsActivity() {
     }
 
     override fun onBackPressed() {
-        // Handle back for below Android 12
-        // If search is always visible, loose focus and collapse keyboard
         if (isSearchBarAlwaysVisible) {
             searchField.clearFocus()
             val imm =
                 getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
             imm.hideSoftInputFromWindow(searchField.windowToken, 0)
-        }
-        // If search is expanded, collapse it; otherwise consume back to prevent launcher restart
-        else if (isSearchExpanded) {
+        } else if (isSearchExpanded) {
             collapseSearch()
         }
-        // Else, do nothing (consume back to keep launcher open)
     }
 
-    // --- Settings sync (row visibility only) ---
     private fun syncSettings() {
         val searchVisible = prefs.isSearchVisible()
 
@@ -346,7 +317,6 @@ class MainActivity : CsActivity() {
             if (searchVisible && !isSearchBarAlwaysVisible) View.VISIBLE else View.GONE
     }
 
-    // --- Open system clock safely ---
     private fun openSystemClock() {
         val packageName = prefs.getClockApp()
         if (packageName.isNotEmpty()) {
@@ -362,49 +332,38 @@ class MainActivity : CsActivity() {
                 return
             }
         }
-        // Fallback: launch system clock via standard intent
         val intent = Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         runCatching { startActivity(intent) }
     }
 
+    // The only place in the app where FLAG_SHOW_WALLPAPER is ever set.
+    // All other activities get bg_1 via CsActivity.applyWindowBackground().
     private fun applyHomeBackground(force: Boolean = false) {
         val mode = prefs.getHomeBackgroundMode()
         val wallpaperSignature = homeBackgroundManager.getWallpaperSignature()
         val theme = prefs.getTheme()
 
-        if (!force && mode == lastAppliedBackgroundMode && wallpaperSignature == lastAppliedWallpaperSignature && theme == lastAppliedTheme) {
-            return
-        }
+        if (!force &&
+            mode == lastAppliedBackgroundMode &&
+            wallpaperSignature == lastAppliedWallpaperSignature &&
+            theme == lastAppliedTheme
+        ) return
 
         if (mode == PrefsManager.BackgroundMode.WALLPAPER) {
-            applyWallpaperModeBackground()
+            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+            window.setBackgroundDrawable(homeBackgroundManager.createWallpaperOverlayDrawable())
+            window.navigationBarColor = Color.TRANSPARENT
+            rootView.setBackgroundColor(Color.TRANSPARENT)
         } else {
-            disableWindowWallpaper(mode)
+            applyWindowBackground()
             homeBackgroundManager.applyTo(rootView, mode)
         }
 
         lastAppliedBackgroundMode = mode
         lastAppliedWallpaperSignature = wallpaperSignature
         lastAppliedTheme = theme
-    }
-
-    private fun applyWallpaperModeBackground() {
-        enableWindowWallpaper()
-        rootView.setBackgroundColor(Color.TRANSPARENT)
-        applyNavBarColor()
-    }
-
-    private fun enableWindowWallpaper() {
-        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
-        window.setBackgroundDrawable(homeBackgroundManager.createWallpaperOverlayDrawable())
-    }
-
-    private fun disableWindowWallpaper(mode: String) {
-        window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
-        window.setBackgroundDrawable(homeBackgroundManager.createBackgroundDrawable(mode))
-        applyNavBarColor()
     }
 
     private fun schedulePostResumeRefresh() {

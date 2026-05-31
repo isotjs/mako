@@ -3,7 +3,6 @@ package com.rama.mako.activities
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.view.WindowManager
 import com.rama.mako.CsActivity
 import com.rama.mako.R
 import com.rama.mako.activities.settings.SettingsAppearanceController
@@ -29,11 +28,8 @@ class SettingsActivity : CsActivity() {
 
     private lateinit var clockController: SettingsClockController
     private lateinit var appearanceController: SettingsAppearanceController
-    private lateinit var homeBackgroundManager: HomeBackgroundManager
-    private lateinit var settingsRootView: View
-
-    private var lastAppliedBackgroundMode: String? = null
-    private var lastAppliedWallpaperSignature: Int? = null
+    internal lateinit var homeBackgroundManager: HomeBackgroundManager
+    internal lateinit var settingsRootView: View
 
     private var isUnlocked = false
     private var isLockScreenShowing = false
@@ -90,41 +86,10 @@ class SettingsActivity : CsActivity() {
             )
         }
     }
-
+    
     fun applySettingsBackground(force: Boolean = false) {
-        val mode = prefs.getHomeBackgroundMode()
-        val wallpaperSignature = homeBackgroundManager.getWallpaperSignature()
-
-        if (!force &&
-            mode == lastAppliedBackgroundMode &&
-            wallpaperSignature == lastAppliedWallpaperSignature
-        ) {
-            return
-        }
-
-        if (mode == PrefsManager.BackgroundMode.WALLPAPER) {
-            enableWindowWallpaper()
-        } else {
-            disableWindowWallpaper(mode)
-            homeBackgroundManager.applyToSettings(settingsRootView, mode)
-        }
-
-        lastAppliedBackgroundMode = mode
-        lastAppliedWallpaperSignature = wallpaperSignature
-    }
-
-    private fun enableWindowWallpaper() {
-        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
-        window.setBackgroundDrawable(
-            homeBackgroundManager.createWallpaperOverlayDrawable()
-        )
-    }
-
-    private fun disableWindowWallpaper(mode: String) {
-        window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
-        window.setBackgroundDrawable(
-            homeBackgroundManager.createBackgroundDrawable(mode)
-        )
+        applyWindowBackground()
+        homeBackgroundManager.applyToSettings(settingsRootView, PrefsManager.BackgroundMode.DEFAULT)
     }
 
     override fun onActivityResult(
