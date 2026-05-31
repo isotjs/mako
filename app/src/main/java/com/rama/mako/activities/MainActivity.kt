@@ -393,6 +393,7 @@ class MainActivity : CsActivity() {
     private fun applyWallpaperModeBackground() {
         enableWindowWallpaper()
         rootView.setBackgroundColor(Color.TRANSPARENT)
+        applyNavBarColor()
     }
 
     private fun enableWindowWallpaper() {
@@ -403,6 +404,7 @@ class MainActivity : CsActivity() {
     private fun disableWindowWallpaper(mode: String) {
         window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
         window.setBackgroundDrawable(homeBackgroundManager.createBackgroundDrawable(mode))
+        applyNavBarColor()
     }
 
     private fun schedulePostResumeRefresh() {

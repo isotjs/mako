@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -14,8 +15,6 @@ import com.rama.mako.managers.ThemeManager
 import com.rama.mako.utils.dp
 import com.rama.mako.managers.PrefsManager
 import com.rama.mako.utils.LocaleHelper
-import kotlin.text.toInt
-import kotlin.times
 
 abstract class CsActivity : Activity() {
 
@@ -107,10 +106,14 @@ abstract class CsActivity : Activity() {
         applyNavBarColor()
     }
 
-    private fun applyNavBarColor() {
+    protected fun applyNavBarColor() {
         val palette = ThemeManager.paletteFor(prefs.getTheme(), this)
-        window.navigationBarColor = palette.bg_1
-        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(palette.bg_1))
+        if (prefs.getHomeBackgroundMode() == PrefsManager.BackgroundMode.WALLPAPER) {
+            window.navigationBarColor = Color.TRANSPARENT
+        } else {
+            window.navigationBarColor = palette.bg_1
+            window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(palette.bg_1))
+        }
     }
 
     protected fun updateSystemBars(root: View) {
