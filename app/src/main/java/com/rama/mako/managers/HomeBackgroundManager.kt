@@ -1,6 +1,5 @@
 package com.rama.mako.managers
 
-import android.app.WallpaperColors
 import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Color
@@ -8,9 +7,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
-import com.rama.mako.R
 
 class HomeBackgroundManager(context: Context) {
 
@@ -34,16 +31,8 @@ class HomeBackgroundManager(context: Context) {
     }
 
     fun createBackgroundDrawable(mode: String): Drawable {
-        return when (mode) {
-            PrefsManager.BackgroundMode.WALLPAPER -> ColorDrawable(
-                ContextCompat.getColor(
-                    appContext,
-                    R.color.bg_1
-                )
-            )
-
-            else -> ColorDrawable(ContextCompat.getColor(appContext, R.color.bg_1))
-        }
+        val palette = ThemeManager.paletteFor(prefs.getTheme(), appContext)
+        return ColorDrawable(palette.bg_1)
     }
 
     fun getWallpaperSignature(): Int? {

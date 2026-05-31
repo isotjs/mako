@@ -63,6 +63,7 @@ class MainActivity : CsActivity() {
     private var wallpaperReceiverRegistered = false
     private var lastAppliedBackgroundMode: String? = null
     private var lastAppliedWallpaperSignature: Int? = null
+    private var lastAppliedTheme: String? = null
 
     companion object {
         private const val WALLPAPER_CHANGED_ACTION = "android.intent.action.WALLPAPER_CHANGED"
@@ -371,8 +372,9 @@ class MainActivity : CsActivity() {
     private fun applyHomeBackground(force: Boolean = false) {
         val mode = prefs.getHomeBackgroundMode()
         val wallpaperSignature = homeBackgroundManager.getWallpaperSignature()
+        val theme = prefs.getTheme()
 
-        if (!force && mode == lastAppliedBackgroundMode && wallpaperSignature == lastAppliedWallpaperSignature) {
+        if (!force && mode == lastAppliedBackgroundMode && wallpaperSignature == lastAppliedWallpaperSignature && theme == lastAppliedTheme) {
             return
         }
 
@@ -385,6 +387,7 @@ class MainActivity : CsActivity() {
 
         lastAppliedBackgroundMode = mode
         lastAppliedWallpaperSignature = wallpaperSignature
+        lastAppliedTheme = theme
     }
 
     private fun applyWallpaperModeBackground() {
