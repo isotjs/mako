@@ -140,7 +140,7 @@
     <string name="toast_no_icon_pack_found">No compatible icon pack found</string>
     <string name="toast_invalid_color">Invalid color</string>
 
-    <!-- Admin :: Screen Lock -->
+    <!-- Admin Screen Lock -->
     <string name="device_admin_label">Mako screen lock</string>
     <string name="device_admin_description">Allows Mako to lock the screen from the home screen gesture.</string>
     <string name="double_tap_sleep_admin_explanation">Mako needs device admin permission to turn off the screen when you double tap on the home screen.</string>
