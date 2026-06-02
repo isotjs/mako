@@ -31,6 +31,7 @@
     <!-- Disclaimers/small -->
     <string name="disclaimer_delete_group">Uygulamalarınız aşağıdaki gruba taşınacaktır.</string>
     <string name="disclaimer_pick_clock_app">Buradan bir uygulama seçmek, onu varsayılan saat eylemi olarak ayarlar. Ana ekranınızdaki saate dokunduğunuzda bu uygulama açılır.</string>
+    <string name="disclaimer_pick_date_app">Buradan bir uygulama seçmek, onu varsayılan tarih eylemi olarak ayarlar. Ana ekranınızdaki tarihe dokunduğunuzda bu uygulama açılır.</string>
     <string name="disclaimer_pick_icon_pack">Yüklü bir ikon paketi seçin. Bir ikon eksikse Mako, o uygulama için sistem ikonunu kullanır.</string>
 
     <!-- Buttons 1 -->
@@ -50,6 +51,7 @@
     <string name="btn_theme_apply_custom">Özel Temayı Uygula</string>
     <string name="btn_set_default">Başlatıcıyı varsayılan yap</string>
     <string name="btn_set_clock_app">Saat dokunuş eylemini değiştir</string>
+    <string name="btn_set_date_app">Tarih dokunuş eylemini değiştir</string>
     <string name="btn_refresh_launcher">Başlatıcıyı yenile</string>
     <string name="btn_change_wallpaper">Sistem duvar kağıdını değiştir</string>
     <string name="btn_edit_apps">Yüklü uygulamaları yönet</string>
@@ -132,6 +134,8 @@
     <string name="toast_reset_done">Sıfırlama tamamlandı</string>
     <string name="toast_reset_failed">Sıfırlama başarısız</string>
     <string name="toast_clock_app_selected">Seçildi: %1$s</string>
+    <string name="toast_date_app_selected">Seçildi: %1$s</string>
+    <string name="toast_no_date_app_found">Tarih uygulaması bulunamadı</string>
     <string name="toast_group_label_updated">Etiket Güncellendi</string>
     <string name="toast_select_target_group">Bir hedef grup seçin</string>
     <string name="toast_label_changed">Uygulama etiketi güncellendi</string>

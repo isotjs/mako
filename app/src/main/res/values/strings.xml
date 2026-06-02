@@ -30,6 +30,7 @@
     <!-- Disclaimers/small -->
     <string name="disclaimer_delete_group">Your apps will go to the following group.</string>
     <string name="disclaimer_pick_clock_app">Selecting an app here will set it as your default clock action. When you tap the clock on your home screen, this app will be launched.</string>
+    <string name="disclaimer_pick_date_app">Selecting an app here will set it as your default date action. When you tap the date on your home screen, this app will be launched.</string>
     <string name="disclaimer_pick_icon_pack">Choose an installed icon pack. If an icon is missing, Mako will use the system icon for that app.</string>
 
     <!-- Buttons 1 -->
@@ -49,6 +50,7 @@
     <string name="btn_theme_apply_custom">Apply Custom Theme</string>
     <string name="btn_set_default">Set Launcher as default</string>
     <string name="btn_set_clock_app">Change Clock Tap Action</string>
+    <string name="btn_set_date_app">Change Date Tap Action</string>
     <string name="btn_refresh_launcher">Refresh launcher</string>
     <string name="btn_change_wallpaper">Change OS wallpaper</string>
     <string name="btn_edit_apps">Manage Installed Apps</string>
@@ -131,6 +133,8 @@
     <string name="toast_reset_done">Reset done</string>
     <string name="toast_reset_failed">Reset failed</string>
     <string name="toast_clock_app_selected">Selected: %1$s</string>
+    <string name="toast_date_app_selected">Selected: %1$s</string>
+    <string name="toast_no_date_app_found">No date app found</string>
     <string name="toast_group_label_updated">Label Updated</string>
     <string name="toast_select_target_group">Select a target group</string>
     <string name="toast_label_changed">App label updated</string>

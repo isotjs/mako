@@ -121,6 +121,7 @@ class MainActivity : CsActivity() {
         clockManager = ClockManager(timeText, dateText, this) // now uses PrefsManager internally
         clockManager.start()
         timeText.setOnClickListener { openSystemClock() }
+        dateText.setOnClickListener { openDateApp() }
 
         // --- Battery ---
         batteryManager = BatteryManager(
@@ -358,6 +359,24 @@ class MainActivity : CsActivity() {
             Toast.makeText(this, getString(R.string.double_tap_sleep_failed_toast), Toast.LENGTH_SHORT)
                 .show()
             false
+        }
+    }
+
+    // --- Open date app ---
+    private fun openDateApp() {
+        val packageName = prefs.getDateApp()
+        if (packageName.isNotEmpty()) {
+            val app = appsProvider.getAll().firstOrNull { it.packageName == packageName }
+            if (app != null) {
+                if (!appsProvider.launch(app)) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.toast_unable_launch_app),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                return
+            }
         }
     }
 

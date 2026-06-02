@@ -72,6 +72,7 @@ class PrefsManager private constructor(context: Context) {
         const val BATTERY_CHARGE_STATUS = "battery:charge_status"
         const val CLOCK_FORMAT = "clock:format"
         const val CLOCK_APP = "clock:app"
+        const val DATE_APP = "date:app"
         const val FONT_STYLE = "font:style"
         const val FONT_CUSTOM_PATH = "font:custom_path"
         const val APP_LANGUAGE = "app:language"
@@ -206,6 +207,7 @@ class PrefsManager private constructor(context: Context) {
 
                 .putString(PrefKeys.CLOCK_FORMAT, ClockFormat.HOUR_24)
                 .putString(PrefKeys.CLOCK_APP, "")
+                .putString(PrefKeys.DATE_APP, "")
                 .putString(PrefKeys.APP_LANGUAGE, Language.SYSTEM)
 
                 .putFloat(PrefKeys.APP_UI_SCALE, 1f)
@@ -421,6 +423,12 @@ class PrefsManager private constructor(context: Context) {
 
     fun setClockApp(appId: String) =
         prefs.edit().putString(PrefKeys.CLOCK_APP, appId).apply()
+
+    fun getDateApp(): String =
+        prefs.getString(PrefKeys.DATE_APP, "") ?: ""
+
+    fun setDateApp(appId: String) =
+        prefs.edit().putString(PrefKeys.DATE_APP, appId).apply()
 
     // SETTINGS - DATE
 

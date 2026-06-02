@@ -10,6 +10,7 @@ import com.rama.mako.activities.settings.SettingsAppearanceController
 import com.rama.mako.activities.settings.SettingsBasicController
 import com.rama.mako.activities.settings.SettingsCheckboxController
 import com.rama.mako.activities.settings.SettingsClockController
+import com.rama.mako.activities.settings.SettingsDateController
 import com.rama.mako.activities.settings.SettingsPinController
 import com.rama.mako.activities.settings.SettingsGroupsController
 import com.rama.mako.activities.settings.SettingsIconsController
@@ -28,6 +29,7 @@ class SettingsActivity : CsActivity() {
     lateinit var groupsManager: GroupsManager
 
     private lateinit var clockController: SettingsClockController
+    private lateinit var dateController: SettingsDateController
     private lateinit var checkboxController: SettingsCheckboxController
     private lateinit var appearanceController: SettingsAppearanceController
     private lateinit var homeBackgroundManager: HomeBackgroundManager
@@ -57,6 +59,7 @@ class SettingsActivity : CsActivity() {
         groupsManager = GroupsManager(this, appsProvider)
 
         clockController = SettingsClockController(this).also { it.setup() }
+        dateController = SettingsDateController(this).also { it.setup() }
 
         SettingsBasicController(this).setup()
         appearanceController = SettingsAppearanceController(this).also { it.setup() }

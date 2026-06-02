@@ -406,6 +406,11 @@
                     android:id="@+id/show_year_day"
                     android:text="@string/checkbox_show_year_day"
                     style="@style/Checkbox" />
+
+                <Button
+                    android:id="@+id/set_date_app_button"
+                    android:text="@string/btn_set_date_app"
+                    style="@style/BTN2" />
             </com.rama.mako.widgets.WdCollapsibleSection>
             <!--Battery-->
             <com.rama.mako.widgets.WdCollapsibleSection
