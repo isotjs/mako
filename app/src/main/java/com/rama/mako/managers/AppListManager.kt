@@ -46,7 +46,12 @@ class AppListManager(
     private val searchableNameCache = mutableMapOf<String, String>()
     private val combiningMarkRegex = Regex("\\p{M}+")
     private val tokenSeparatorRegex = Regex("[^a-z0-9]+")
-    private val specialCharRegex = Regex("[^a-z0-9\\s]+")
+    private val specialCharRegex = Regex("[^a-z0-9]+")
+
+    private companion object {
+        private const val PACKAGE_SCORE_PENALTY = 2000
+        private const val GROUP_SCORE_PENALTY = 4000
+    }
 
     private var isMultiSelectMode = false
     private val selectedApps = mutableSetOf<String>()
@@ -318,19 +323,33 @@ class AppListManager(
             val isVisible = prefs.isGroupVisible(groupId)
             if (!isVisible) return@forEach
 
+            val label = prefs.getGroupLabel(groupId)
+            val normalizedGroupLabel = normalizeForSearch(label)
+            val strippedGroupLabel = stripSpecialChars(normalizedGroupLabel)
+            val groupLabelScore = scoreMatch(strippedGroupLabel, strippedQuery)
+
             val matchedApps = apps.mapNotNull { app ->
                 val normalizedName = getSearchableName(app)
                 val strippedName = stripSpecialChars(normalizedName)
-                val score = scoreMatch(strippedName, strippedQuery) ?: return@mapNotNull null
-                ScoredApp(app = app, score = score, normalizedName = normalizedName)
+                val displayScore = scoreMatch(strippedName, strippedQuery)
+
+                if (displayScore != null) {
+                    ScoredApp(app = app, score = displayScore, normalizedName = normalizedName)
+                } else {
+                    val normalizedPackage = normalizeForSearch(app.packageName)
+                    val strippedPackage = stripSpecialChars(normalizedPackage)
+                    val packageScore = scoreMatch(strippedPackage, strippedQuery)
+                    val score = packageScore?.let { it + PACKAGE_SCORE_PENALTY }
+                        ?: groupLabelScore?.let { it + GROUP_SCORE_PENALTY }
+                        ?: return@mapNotNull null
+                    ScoredApp(app = app, score = score, normalizedName = normalizedName)
+                }
             }.sortedWith(
                 compareBy<ScoredApp> { it.score }
                     .thenBy { it.normalizedName }
             )
 
             if (matchedApps.isEmpty()) return@forEach
-
-            val label = prefs.getGroupLabel(groupId)
 
             matchedGroups.add(
                 GroupMatch(
