@@ -10,8 +10,7 @@ import android.view.View
 import android.view.View.generateViewId
 import android.view.ViewGroup
 import android.widget.*
-import android.widget.RadioButton
-import android.widget.RadioGroup
+
 import com.rama.mako.R
 import com.rama.mako.utils.sp
 import com.rama.mako.activities.SettingsActivity
@@ -92,17 +91,22 @@ class AppListManager(
     private fun buildItems() {
         val allApps = allAppsCache
 
-        // Get all known group IDs
         val groupIds = GroupsManager(context, appsProvider).getGroupIds()
 
-        // Map apps by groupId (NOT label)
-        val groupedMap = allApps.groupBy { app ->
-            prefs.getAppGroupId(app.packageName, app.userHandle) ?: PrefsManager.SystemIds.UNGROUPED
+        val groupedMap = mutableMapOf<String, MutableList<AppsProvider.AppEntry>>()
+        for (app in allApps) {
+            val ids = prefs.getAppGroupIds(app.packageName, app.userHandle)
+            if (ids.isEmpty()) {
+                groupedMap.getOrPut(PrefsManager.SystemIds.UNGROUPED) { mutableListOf() }.add(app)
+            } else {
+                for (groupId in ids) {
+                    groupedMap.getOrPut(groupId) { mutableListOf() }.add(app)
+                }
+            }
         }
 
         items.clear()
 
-        // Include unknown groupIds (apps pointing to deleted groups)
         val unknownGroupIds = groupedMap.keys.filter { it !in groupIds }
         val allGroupIds = (groupIds + unknownGroupIds).distinct()
 
@@ -115,7 +119,6 @@ class AppListManager(
 
             val label = prefs.getGroupLabel(groupId)
 
-            // Header uses label only for display
             if (prefs.hasGroupHeaders()) {
                 items.add(
                     ListItem.Header(
@@ -313,9 +316,16 @@ class AppListManager(
         // All known group IDs
         val groupIds = GroupsManager(context, appsProvider).getGroupIds()
 
-        // Group by ID
-        val groupedMap = allApps.groupBy { app ->
-            prefs.getAppGroupId(app.packageName, app.userHandle) ?: PrefsManager.SystemIds.UNGROUPED
+        val groupedMap = mutableMapOf<String, MutableList<AppsProvider.AppEntry>>()
+        for (app in allApps) {
+            val ids = prefs.getAppGroupIds(app.packageName, app.userHandle)
+            if (ids.isEmpty()) {
+                groupedMap.getOrPut(PrefsManager.SystemIds.UNGROUPED) { mutableListOf() }.add(app)
+            } else {
+                for (groupId in ids) {
+                    groupedMap.getOrPut(groupId) { mutableListOf() }.add(app)
+                }
+            }
         }
 
         // Handle unknown groups (apps pointing to deleted groups)
@@ -457,50 +467,43 @@ class AppListManager(
             .create()
 
         val closeBtn = view.findViewById<View>(R.id.close_button)
-        val container = view.findViewById<RadioGroup>(R.id.groups)
+        val container = view.findViewById<LinearLayout>(R.id.groups)
 
         fun renderGroups() {
             container.removeAllViews()
 
-            val radioGroup = RadioGroup(context)
-
-            val currentGroupId =
-                prefs.getAppGroupId(pkg, app.userHandle) ?: PrefsManager.SystemIds.UNGROUPED
-
-            // All group IDs (include ungrouped)
-            val groupIds = GroupsManager(
-                context,
-                appsProvider
-            ).getGroupIds()
+            val currentGroupIds = prefs.getAppGroupIds(pkg, app.userHandle)
+            val groupIds = GroupsManager(context, appsProvider).getGroupIds()
 
             groupIds.forEachIndexed { index, groupId ->
                 val isLast = index == groupIds.lastIndex
                 val label = prefs.getGroupLabel(groupId)
 
-                val radio = RadioButton(context).apply {
+                val checkBox = CheckBox(context).apply {
                     id = generateViewId()
                     text = label
-                    isChecked = groupId == currentGroupId
-                    layoutParams = RadioGroup.LayoutParams(
-                        RadioGroup.LayoutParams.MATCH_PARENT,
-                        RadioGroup.LayoutParams.WRAP_CONTENT
+                    isChecked = groupId in currentGroupIds
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
                     ).apply {
                         bottomMargin = if (isLast) 0 else context.sp(8f)
                     }
                 }
 
-                ThemeManager.applyTheme(context, radio)
+                ThemeManager.applyTheme(context, checkBox)
 
-                radio.setOnClickListener {
-                    prefs.setAppGroupId(pkg, app.userHandle, groupId)
+                checkBox.setOnClickListener {
+                    if (checkBox.isChecked) {
+                        prefs.addAppToGroup(pkg, app.userHandle, groupId)
+                    } else {
+                        prefs.removeAppFromGroup(pkg, app.userHandle, groupId)
+                    }
                     refresh()
-                    dialog.dismiss()
                 }
 
-                radioGroup.addView(radio)
+                container.addView(checkBox)
             }
-
-            container.addView(radioGroup)
         }
 
         renderGroups()
@@ -574,11 +577,12 @@ class AppListManager(
             .create()
 
         val closeBtn = view.findViewById<View>(R.id.close_button)
-        val container = view.findViewById<RadioGroup>(R.id.groups)
+        val container = view.findViewById<LinearLayout>(R.id.groups)
+
+        val checkedGroupIds = mutableSetOf<String>()
 
         fun renderGroups() {
             container.removeAllViews()
-            val radioGroup = RadioGroup(context)
 
             val groupIds = GroupsManager(context, appsProvider).getGroupIds()
 
@@ -586,42 +590,54 @@ class AppListManager(
                 val isLast = index == groupIds.lastIndex
                 val label = prefs.getGroupLabel(groupId)
 
-                val radio = RadioButton(context).apply {
+                val checkBox = CheckBox(context).apply {
                     id = generateViewId()
                     text = label
-                    layoutParams = RadioGroup.LayoutParams(
-                        RadioGroup.LayoutParams.MATCH_PARENT,
-                        RadioGroup.LayoutParams.WRAP_CONTENT
+                    layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
                     ).apply {
                         bottomMargin = if (isLast) 0 else context.sp(8f)
                     }
                 }
 
-                ThemeManager.applyTheme(context, radio)
+                ThemeManager.applyTheme(context, checkBox)
 
-                radio.setOnClickListener {
-                    batchAssignToGroup(groupId)
-                    dialog.dismiss()
+                checkBox.setOnClickListener {
+                    if (checkBox.isChecked) {
+                        checkedGroupIds.add(groupId)
+                    } else {
+                        checkedGroupIds.remove(groupId)
+                    }
                 }
 
-                radioGroup.addView(radio)
+                container.addView(checkBox)
             }
-
-            container.addView(radioGroup)
         }
 
         renderGroups()
+
+        val root = view as LinearLayout
+        val applyButton = Button(context).apply {
+            text = context.getString(R.string.btn_apply)
+            setOnClickListener {
+                batchAssignToGroups(checkedGroupIds)
+                dialog.dismiss()
+            }
+        }
+        root.addView(applyButton, root.indexOfChild(closeBtn))
+
         closeBtn.setOnClickListener { dialog.dismiss() }
 
         ThemeManager.applyTheme(context, view)
         dialog.show()
     }
 
-    private fun batchAssignToGroup(groupId: String) {
+    private fun batchAssignToGroups(groupIds: Set<String>) {
         for (key in selectedApps) {
             val app = allAppsCache.find { getSelectionKey(it) == key }
             if (app != null) {
-                prefs.setAppGroupId(app.packageName, app.userHandle, groupId)
+                prefs.setAppGroupIds(app.packageName, app.userHandle, groupIds)
             }
         }
         exitMultiSelectMode()

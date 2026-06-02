@@ -50,14 +50,11 @@ class GroupsManager(
         return id
     }
 
-    fun deleteGroup(groupId: String, newGroupId: String?) {
+    fun deleteGroup(groupId: String) {
         val allApps = appsProvider.getAll()
         allApps.forEach { app ->
-            if (prefs.getAppGroupId(app.packageName, app.userHandle) == groupId) {
-                prefs.setAppGroupId(app.packageName, app.userHandle, newGroupId)
-            }
+            prefs.removeAppFromGroup(app.packageName, app.userHandle, groupId)
         }
-
         prefs.removeGroupId(groupId)
         reindexOrder()
     }

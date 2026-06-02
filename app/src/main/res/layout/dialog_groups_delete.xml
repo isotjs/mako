@@ -14,16 +14,6 @@
         android:gravity="center"
         style="@style/Disclaimer" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <RadioGroup
-            android:id="@+id/groups"
-            style="@style/RadioGroup" />
-    </ScrollView>
-
     <Button
         android:id="@+id/yes_button"
         android:text="@string/btn_delete_group"

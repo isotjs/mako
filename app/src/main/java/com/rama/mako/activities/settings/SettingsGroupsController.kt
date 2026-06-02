@@ -4,7 +4,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.View.generateViewId
-import android.view.ViewGroup
 import android.widget.*
 import com.rama.mako.R
 import com.rama.mako.activities.SettingsActivity
@@ -100,64 +99,21 @@ class SettingsGroupsController(private val activity: SettingsActivity) {
         }
 
         SettingsUiUtils.setClickWithHaptics(delete) {
-            val dialogView = activity.layoutInflater.inflate(R.layout.dialog_groups_delete, null)
-
-            val dialog = android.app.Dialog(activity).apply {
-                setContentView(dialogView)
-                setCancelable(true)
-            }
-
-            val yes = dialogView.findViewById<Button>(R.id.yes_button)
-            val no = dialogView.findViewById<Button>(R.id.no_button)
-            val radioGroup = dialogView.findViewById<RadioGroup>(R.id.groups)
-
-            val currentGroupId = name.tag as String
-            val targetGroups = groupsManager.getGroupIds().filter { it != currentGroupId }
-            var selectedGroupId: String? = null
-
-            val radioIdToGroupId = mutableMapOf<Int, String>()
-
-            targetGroups.forEachIndexed { index, targetId ->
-                val radio = RadioButton(activity).apply {
-                    id = View.generateViewId()
-                    text = prefs.getGroupLabel(targetId)
-                }
-
-                radioIdToGroupId[radio.id] = targetId
-                radioGroup.addView(radio)
-
-                if (index == 0) {
-                    radio.isChecked = true
-                    selectedGroupId = targetId
-                }
-            }
-
-            radioGroup.setOnCheckedChangeListener { _, checkedId ->
-                selectedGroupId = radioIdToGroupId[checkedId]
-            }
-
-            SettingsUiUtils.setClickWithHaptics(yes) {
-                if (selectedGroupId == null) {
-                    Toast.makeText(
-                        activity,
-                        activity.getString(R.string.toast_select_target_group),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    groupsManager.deleteGroup(currentGroupId, selectedGroupId!!)
+            val groupId = name.tag as String
+            val dialog = android.app.AlertDialog.Builder(activity)
+                .setTitle(activity.getString(R.string.h2_delete_group))
+                .setMessage(activity.getString(R.string.disclaimer_delete_group))
+                .setPositiveButton(activity.getString(R.string.btn_delete_group)) { _, _ ->
+                    groupsManager.deleteGroup(groupId)
                     container.removeView(row)
-                    dialog.dismiss()
                 }
+                .setNegativeButton(activity.getString(R.string.btn_cancel), null)
+                .create()
+
+            dialog.setOnShowListener {
+                dialog.window?.decorView?.let { ThemeManager.applyTheme(activity, it) }
             }
-
-            SettingsUiUtils.setClickWithHaptics(no) { dialog.dismiss() }
-
-            ThemeManager.applyTheme(activity, dialogView)
             dialog.show()
-            dialog.window?.setLayout(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
         }
 
         SettingsUiUtils.setClickWithHaptics(ascend) {

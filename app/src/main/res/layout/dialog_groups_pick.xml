@@ -14,10 +14,12 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <RadioGroup
+        <LinearLayout
             android:id="@+id/groups"
-            android:focusableInTouchMode="true"
-            style="@style/RadioGroup" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:focusableInTouchMode="true" />
     </ScrollView>
 
     <Button

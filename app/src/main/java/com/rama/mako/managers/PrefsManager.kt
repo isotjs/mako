@@ -126,6 +126,9 @@ class PrefsManager private constructor(context: Context) {
         fun APP_GROUP_ID(pkg: String, userHandle: UserHandle) =
             "${appKey(pkg, userHandle)}:group_id"
 
+        fun APP_GROUP_IDS(pkg: String, userHandle: UserHandle) =
+            "${appKey(pkg, userHandle)}:group_ids"
+
         fun APP_CUSTOM_LABEL(pkg: String, userHandle: UserHandle) =
             "${appKey(pkg, userHandle)}:custom_label"
 
@@ -316,6 +319,39 @@ class PrefsManager private constructor(context: Context) {
         } else {
             prefs.edit().remove(key).apply()
         }
+    }
+
+    fun getAppGroupIds(pkg: String, userHandle: UserHandle): Set<String> {
+        val key = PrefKeys.APP_GROUP_IDS(pkg, userHandle)
+        val stored = prefs.getStringSet(key, null)
+        if (stored != null) return stored
+
+        val oldKey = PrefKeys.APP_GROUP_ID(pkg, userHandle)
+        val oldValue = prefs.getString(oldKey, null)
+        return if (oldValue != null && oldValue != SystemIds.UNGROUPED) {
+            val newSet = setOf(oldValue)
+            prefs.edit().putStringSet(key, newSet).apply()
+            prefs.edit().remove(oldKey).apply()
+            newSet
+        } else {
+            emptySet()
+        }
+    }
+
+    fun setAppGroupIds(pkg: String, userHandle: UserHandle, groupIds: Set<String>) {
+        prefs.edit().putStringSet(PrefKeys.APP_GROUP_IDS(pkg, userHandle), groupIds).apply()
+    }
+
+    fun addAppToGroup(pkg: String, userHandle: UserHandle, groupId: String) {
+        val current = getAppGroupIds(pkg, userHandle).toMutableSet()
+        current.add(groupId)
+        setAppGroupIds(pkg, userHandle, current)
+    }
+
+    fun removeAppFromGroup(pkg: String, userHandle: UserHandle, groupId: String) {
+        val current = getAppGroupIds(pkg, userHandle).toMutableSet()
+        current.remove(groupId)
+        setAppGroupIds(pkg, userHandle, current)
     }
 
     // GROUPS

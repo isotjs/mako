@@ -1,8 +1,13 @@
 # Prefs Schema
 
 ```
-app:com.rama.chipdefense_copper.debug:group_id = "00000000000"
 app:com.rama.chipdefense_copper.debug:custom_name = "Chip Defense: Copper"
+
+# An app can belong to multiple groups (empty set = Ungrouped)
+app:com.rama.chipdefense_copper.debug:group_ids = ["00000000000"]
+
+# Legacy single-group key (migrated to group_ids on read)
+# app:com.rama.chipdefense_copper.debug:group_id = "00000000000"
 
 group:00000000000:label = "------ Default"
 group:00000000000:visible = true
