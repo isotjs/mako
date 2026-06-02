@@ -44,6 +44,7 @@ class AppListManager(
     private lateinit var adapter: ArrayAdapter<ListItem>
     private var allAppsCache: List<AppsProvider.AppEntry> = emptyList()
     private val searchableNameCache = mutableMapOf<String, String>()
+    private val packageNameCache = mutableMapOf<String, String>()
     private val combiningMarkRegex = Regex("\\p{M}+")
     private val tokenSeparatorRegex = Regex("[^a-z0-9]+")
     private val specialCharRegex = Regex("[^a-z0-9]+")
@@ -85,6 +86,7 @@ class AppListManager(
     private fun updateAppsCache() {
         allAppsCache = appsProvider.getAll()
         searchableNameCache.clear()
+        packageNameCache.clear()
     }
 
     private fun buildItems() {
@@ -139,6 +141,12 @@ class AppListManager(
         val key = getAppCacheKey(app)
         return searchableNameCache.getOrPut(key) {
             normalizeForSearch(getDisplayName(app))
+        }
+    }
+
+    private fun getSearchablePackageName(app: AppsProvider.AppEntry): String {
+        return packageNameCache.getOrPut(app.packageName) {
+            stripSpecialChars(normalizeForSearch(app.packageName))
         }
     }
 
@@ -336,9 +344,7 @@ class AppListManager(
                 if (displayScore != null) {
                     ScoredApp(app = app, score = displayScore, normalizedName = normalizedName)
                 } else {
-                    val normalizedPackage = normalizeForSearch(app.packageName)
-                    val strippedPackage = stripSpecialChars(normalizedPackage)
-                    val packageScore = scoreMatch(strippedPackage, strippedQuery)
+                    val packageScore = scoreMatch(getSearchablePackageName(app), strippedQuery)
                     val score = packageScore?.let { it + PACKAGE_SCORE_PENALTY }
                         ?: groupLabelScore?.let { it + GROUP_SCORE_PENALTY }
                         ?: return@mapNotNull null
