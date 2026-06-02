@@ -25,7 +25,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.Toast
-import android.window.OnBackInvokedCallback
+import androidx.activity.OnBackPressedCallback
 import com.rama.mako.CsActivity
 import com.rama.mako.R
 import com.rama.mako.managers.AppListManager
@@ -57,7 +57,6 @@ class MainActivity : CsActivity() {
     private lateinit var clearBtn: FrameLayout
     private var isSearchBarAlwaysVisible = false
 
-    private var backCallback: OnBackInvokedCallback? = null
     private var isSearchExpanded = false
     private var isProgrammaticSearchUpdate = false
     private val searchDebounceHandler = Handler(Looper.getMainLooper())
@@ -152,7 +151,19 @@ class MainActivity : CsActivity() {
         }
 
         initSearchbar()
-        setupBackHandling()
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (appListManager.handleBackPress()) return
+                if (isSearchBarAlwaysVisible) {
+                    searchField.clearFocus()
+                    val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+                    imm.hideSoftInputFromWindow(searchField.windowToken, 0)
+                } else if (isSearchExpanded) {
+                    collapseSearch()
+                }
+            }
+        })
     }
 
     private fun initDoubleTapToSleep() {
@@ -167,33 +178,6 @@ class MainActivity : CsActivity() {
                 }
             }
         )
-    }
-
-    // --- OnBackInvokedCallback registor for Android 13+ ---
-
-    private fun setupBackHandling() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            backCallback = OnBackInvokedCallback {
-                // If in multi-select mode, exit it
-                if (appListManager.handleBackPress()) return@OnBackInvokedCallback
-                // If search is always visible, loose focus and collapse keyboard
-                if (isSearchBarAlwaysVisible) {
-                    searchField.clearFocus()
-                    val imm =
-                        getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-                    imm.hideSoftInputFromWindow(searchField.windowToken, 0)
-                }
-                // If search is expanded, collapse it; otherwise consume back to prevent launcher restart
-                else if (isSearchExpanded) {
-                    collapseSearch()
-                }
-                // Else, do nothing (consume back to keep launcher open)
-            }
-            onBackInvokedDispatcher.registerOnBackInvokedCallback(
-                android.window.OnBackInvokedDispatcher.PRIORITY_OVERLAY,
-                backCallback!!
-            )
-        }
     }
 
     private fun initSearchbar() {
@@ -327,11 +311,6 @@ class MainActivity : CsActivity() {
         // Clean up debounce handler
         searchDebounceRunnable?.let { searchDebounceHandler.removeCallbacks(it) }
 
-        // Unregister back callback for Android 13+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && backCallback != null) {
-            onBackInvokedDispatcher.unregisterOnBackInvokedCallback(backCallback!!)
-        }
-
         batteryManager.unregister()
         clockManager.stop()
     }
@@ -341,24 +320,6 @@ class MainActivity : CsActivity() {
             doubleTapGestureDetector.onTouchEvent(ev)
         }
         return super.dispatchTouchEvent(ev)
-    }
-
-    override fun onBackPressed() {
-        // Handle back for below Android 12
-        // If in multi-select mode, exit it
-        if (appListManager.handleBackPress()) return
-        // If search is always visible, loose focus and collapse keyboard
-        if (isSearchBarAlwaysVisible) {
-            searchField.clearFocus()
-            val imm =
-                getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-            imm.hideSoftInputFromWindow(searchField.windowToken, 0)
-        }
-        // If search is expanded, collapse it; otherwise consume back to prevent launcher restart
-        else if (isSearchExpanded) {
-            collapseSearch()
-        }
-        // Else, do nothing (consume back to keep launcher open)
     }
 
     // --- Settings sync (row visibility only) ---

@@ -3,6 +3,7 @@
     android:id="@+id/root"
     android:background="?attr/bgColor"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     style="@style/VerticalListDivided">
 
     <ScrollView

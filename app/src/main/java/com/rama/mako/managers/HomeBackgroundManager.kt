@@ -55,7 +55,7 @@ class HomeBackgroundManager(context: Context) {
 
     private fun resolveWallpaperScrimColor(): Int {
         val fallback = ContextCompat.getColor(appContext, R.color.bg_wallpaper_scrim)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) return fallback
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return fallback
 
         val wallpaperColors = runCatching {
             wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)

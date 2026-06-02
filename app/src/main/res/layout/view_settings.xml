@@ -4,6 +4,7 @@
     android:id="@+id/settings_root"
     android:background="@color/bg_1"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     style="@style/VerticalListDivided">
 
     <ScrollView
@@ -92,6 +93,7 @@
                 <LinearLayout
                     android:id="@+id/groups"
                     android:focusableInTouchMode="true"
+                    android:orientation="vertical"
                     style="@style/VerticalListDivided_BG2" />
 
                 <Button

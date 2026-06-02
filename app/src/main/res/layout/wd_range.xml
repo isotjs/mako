@@ -7,5 +7,6 @@
 
     <LinearLayout
         android:id="@+id/container"
+        android:orientation="horizontal"
         style="@style/HorizontalListDividedSmall" />
 </FrameLayout>
