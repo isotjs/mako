@@ -69,6 +69,7 @@
     <string name="checkbox_show_profile_indicator">Profilindikator anzeigen</string>
     <string name="checkbox_show_battery">Ladestand anzeigen</string>
     <string name="checkbox_show_system_bar">Systemleiste anzeigen</string>
+    <string name="double_tap_sleep_label">Doppeltippen zum Sperren</string>
     <string name="checkbox_show_search">Suchleiste anzeigen</string>
     <string name="checkbox_show_date">Datum anzeigen</string>
     <string name="checkbox_show_clock">Uhr anzeigen</string>
@@ -138,4 +139,10 @@
     <!-- Easter Egg -->
     <string name="easter_eggs_unlock">Kannst du bitte aufhören damit zu spielen xD</string>
     <string name="easter_eggs_counter">Noch %d...</string>
+    <string name="device_admin_label">Mako Bildschirm sperren</string>
+    <string name="device_admin_description">Erlaubt Mako, den Bildschirm per Startbildschirm-Geste zu sperren.</string>
+    <string name="double_tap_sleep_admin_explanation">Mako benötigt Geräteadministrator-Rechte, um den Bildschirm beim Doppeltippen auf dem Startbildschirm auszuschalten.</string>
+    <string name="double_tap_sleep_enable_admin_toast">Aktiviere Geräteadministrator für Doppeltippen zum Sperren</string>
+    <string name="double_tap_sleep_admin_declined_toast">Geräteadministrator wurde nicht aktiviert</string>
+    <string name="double_tap_sleep_failed_toast">Bildschirm konnte nicht gesperrt werden</string>
 </resources>

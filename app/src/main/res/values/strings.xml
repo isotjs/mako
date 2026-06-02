@@ -103,6 +103,7 @@
     <string name="checkbox_show_search">Show search bar</string>
     <string name="checkbox_show_battery">Show battery</string>
     <string name="checkbox_show_system_bar">Show system bar</string>
+    <string name="double_tap_sleep_label">Double tap to sleep</string>
     <string name="checkbox_show_date">Show date</string>
     <string name="checkbox_show_clock">Show clock</string>
     <string name="checkbox_show_year_day">Show day of the year</string>
@@ -138,6 +139,14 @@
     <string name="toast_monochrome_fallback">Monochrome icons require Android 13+, using fallback where unavailable</string>
     <string name="toast_no_icon_pack_found">No compatible icon pack found</string>
     <string name="toast_invalid_color">Invalid color</string>
+
+    <!-- Admin :: Screen Lock -->
+    <string name="device_admin_label">Mako screen lock</string>
+    <string name="device_admin_description">Allows Mako to lock the screen from the home screen gesture.</string>
+    <string name="double_tap_sleep_admin_explanation">Mako needs device admin permission to turn off the screen when you double tap on the home screen.</string>
+    <string name="double_tap_sleep_enable_admin_toast">Enable device admin access for double tap to sleep</string>
+    <string name="double_tap_sleep_admin_declined_toast">Device admin access was not granted</string>
+    <string name="double_tap_sleep_failed_toast">Unable to lock the screen</string>
 
     <!-- AltDescription -->
     <string name="altdescr_search_icon">Toggle search</string>

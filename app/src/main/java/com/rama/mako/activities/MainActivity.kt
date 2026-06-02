@@ -2,7 +2,9 @@ package com.rama.mako.activities
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.admin.DevicePolicyManager
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Color
@@ -10,8 +12,10 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.GestureDetector
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.OvershootInterpolator
@@ -31,6 +35,7 @@ import com.rama.mako.managers.ClockManager
 import com.rama.mako.managers.HomeBackgroundManager
 import com.rama.mako.managers.PrefsManager
 import com.rama.mako.managers.ThemeManager
+import com.rama.mako.receivers.ScreenLockAdminReceiver
 
 class MainActivity : CsActivity() {
 
@@ -62,6 +67,9 @@ class MainActivity : CsActivity() {
     private var wallpaperReceiverRegistered = false
     private var lastAppliedBackgroundMode: String? = null
     private var lastAppliedWallpaperSignature: Int? = null
+    private var isDoubleTapToSleepEnabled = false
+    private lateinit var doubleTapGestureDetector: GestureDetector
+    private lateinit var screenLockAdminComponent: ComponentName
 
     companion object {
         private const val WALLPAPER_CHANGED_ACTION = "android.intent.action.WALLPAPER_CHANGED"
@@ -94,6 +102,7 @@ class MainActivity : CsActivity() {
 
         rootView = findViewById(R.id.root)
         applyEdgeToEdgePadding(rootView)
+        initDoubleTapToSleep()
         applyCurrentTheme(rootView)
         rootView.isFocusableInTouchMode = false
         rootView.requestFocus()
@@ -144,6 +153,20 @@ class MainActivity : CsActivity() {
 
         initSearchbar()
         setupBackHandling()
+    }
+
+    private fun initDoubleTapToSleep() {
+        screenLockAdminComponent = ComponentName(this, ScreenLockAdminReceiver::class.java)
+        doubleTapGestureDetector = GestureDetector(
+            this,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onDown(e: MotionEvent): Boolean = true
+
+                override fun onDoubleTap(e: MotionEvent): Boolean {
+                    return lockScreenOnDoubleTap()
+                }
+            }
+        )
     }
 
     // --- OnBackInvokedCallback registor for Android 13+ ---
@@ -311,6 +334,13 @@ class MainActivity : CsActivity() {
         clockManager.stop()
     }
 
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (isDoubleTapToSleepEnabled) {
+            doubleTapGestureDetector.onTouchEvent(ev)
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
     override fun onBackPressed() {
         // Handle back for below Android 12
         // If search is always visible, loose focus and collapse keyboard
@@ -331,6 +361,7 @@ class MainActivity : CsActivity() {
     private fun syncSettings() {
         val searchVisible = prefs.isSearchVisible()
 
+        isDoubleTapToSleepEnabled = prefs.isDoubleTapToSleepEnabled()
         isSearchBarAlwaysVisible = prefs.isSearchBarAlwaysVisible()
         timeText.visibility =
             if (prefs.getClockFormat() != PrefsManager.ClockFormat.NONE) View.VISIBLE else View.GONE
@@ -342,6 +373,26 @@ class MainActivity : CsActivity() {
             if (searchVisible) View.VISIBLE else View.GONE
         searchIcon.visibility =
             if (searchVisible && !isSearchBarAlwaysVisible) View.VISIBLE else View.GONE
+    }
+
+    private fun lockScreenOnDoubleTap(): Boolean {
+        if (!isDoubleTapToSleepEnabled) return false
+
+        val policyManager = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        if (!policyManager.isAdminActive(screenLockAdminComponent)) {
+            Toast.makeText(this, getString(R.string.double_tap_sleep_enable_admin_toast), Toast.LENGTH_SHORT)
+                .show()
+            return false
+        }
+
+        return runCatching {
+            policyManager.lockNow()
+            true
+        }.getOrElse {
+            Toast.makeText(this, getString(R.string.double_tap_sleep_failed_toast), Toast.LENGTH_SHORT)
+                .show()
+            false
+        }
     }
 
     // --- Open system clock safely ---

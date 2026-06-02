@@ -69,6 +69,7 @@
     <string name="checkbox_show_profile_indicator">Profil göstergesini göster</string>
     <string name="checkbox_show_battery">Pili göster</string>
     <string name="checkbox_show_system_bar">Sistem çubuğunu göster</string>
+    <string name="double_tap_sleep_label">Çift dokunarak ekranı kapat</string>
     <string name="checkbox_show_search">Arama çubuğunu göster</string>
     <string name="checkbox_show_date">Tarihi göster</string>
     <string name="checkbox_show_clock">Saati göster</string>

@@ -28,6 +28,7 @@ class SettingsActivity : CsActivity() {
     lateinit var groupsManager: GroupsManager
 
     private lateinit var clockController: SettingsClockController
+    private lateinit var checkboxController: SettingsCheckboxController
     private lateinit var appearanceController: SettingsAppearanceController
     private lateinit var homeBackgroundManager: HomeBackgroundManager
     private lateinit var settingsRootView: View
@@ -61,7 +62,7 @@ class SettingsActivity : CsActivity() {
         appearanceController = SettingsAppearanceController(this).also { it.setup() }
         SettingsLanguageController(this).setup()
         SettingsIconsController(this).setup()
-        SettingsCheckboxController(this).setup()
+        checkboxController = SettingsCheckboxController(this).also { it.setup() }
         SettingsGroupsController(this).setup()
         SettingsPinController(this).setup()
 
@@ -143,6 +144,7 @@ class SettingsActivity : CsActivity() {
         }
 
         clockController.onActivityResult(requestCode, resultCode, data)
+        checkboxController.onActivityResult(requestCode, resultCode)
         appearanceController.onActivityResult(requestCode, resultCode, data)
     }
 }
