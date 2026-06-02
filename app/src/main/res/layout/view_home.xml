@@ -132,4 +132,35 @@
         </FrameLayout>
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/multi_select_bar"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12sp"
+        android:visibility="gone"
+        android:background="@color/bg_2"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/selected_count"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="18sp"
+            android:textColor="@color/foreground" />
+
+        <Button
+            android:id="@+id/multi_select_cancel_button"
+            android:layout_width="wrap_content"
+            android:text="@string/multi_select_cancel"
+            style="@style/BTN2" />
+
+        <Button
+            android:id="@+id/move_to_group_button"
+            android:layout_width="wrap_content"
+            android:text="@string/multi_select_move_to_group"
+            style="@style/BTN1" />
+    </LinearLayout>
+
 </LinearLayout>

@@ -116,6 +116,7 @@
     <string name="ctxmenu_rename_app">Uygulamayı yeniden adlandır...</string>
     <string name="ctxmenu_add_to_favorites">Grubu değiştir...</string>
     <string name="ctxmenu_open_settings">Uygulama ayarları...</string>
+    <string name="ctxmenu_select_multiple">Birden çok seç...</string>
 
     <!-- InputLabel -->
     <string name="label_zoom">Yakınlaştırma</string>
@@ -156,6 +157,7 @@
     <string name="altdescr_ascend_group">Grubu yukarı taşı</string>
     <string name="altdescr_descend_group">Grubu aşağı taşı</string>
     <string name="altdescr_save">Kaydet</string>
+    <string name="altdescr_selection_check">Seçildi</string>
     <string name="altdescr_delete_group">Grubu sil</string>
     <string name="altdescr_toggle_pin_visibility">PIN görünürlüğünü değiştir</string>
     <string name="altdescr_save_pin">PIN\'i kaydet</string>
@@ -229,6 +231,11 @@
     <string name="unit_fahrenheit">F</string>
     <string name="battery_temp" translatable="false">%1$d°%2$s</string>
     <string name="battery_temp_labeled" translatable="false">%1$d°%2$s (%3$s)</string>
+
+    <!-- Multi Select -->
+    <string name="multi_select_count">%d seçildi</string>
+    <string name="multi_select_move_to_group">Gruba taşı</string>
+    <string name="multi_select_cancel">İptal</string>
 
     <!-- Easter Egg -->
     <string name="easter_eggs_unlock">Lütfen bununla oynamayı bırakır mısın xD</string>

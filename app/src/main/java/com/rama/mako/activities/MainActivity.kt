@@ -174,6 +174,8 @@ class MainActivity : CsActivity() {
     private fun setupBackHandling() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             backCallback = OnBackInvokedCallback {
+                // If in multi-select mode, exit it
+                if (appListManager.handleBackPress()) return@OnBackInvokedCallback
                 // If search is always visible, loose focus and collapse keyboard
                 if (isSearchBarAlwaysVisible) {
                     searchField.clearFocus()
@@ -343,6 +345,8 @@ class MainActivity : CsActivity() {
 
     override fun onBackPressed() {
         // Handle back for below Android 12
+        // If in multi-select mode, exit it
+        if (appListManager.handleBackPress()) return
         // If search is always visible, loose focus and collapse keyboard
         if (isSearchBarAlwaysVisible) {
             searchField.clearFocus()
@@ -377,6 +381,7 @@ class MainActivity : CsActivity() {
 
     private fun lockScreenOnDoubleTap(): Boolean {
         if (!isDoubleTapToSleepEnabled) return false
+        if (isSearchExpanded || appListManager.isInMultiSelectMode()) return false
 
         val policyManager = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
         if (!policyManager.isAdminActive(screenLockAdminComponent)) {

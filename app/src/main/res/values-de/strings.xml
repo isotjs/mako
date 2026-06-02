@@ -116,6 +116,7 @@
     <string name="ctxmenu_rename_app">App umbenennen...</string>
     <string name="ctxmenu_add_to_favorites">Gruppe ändern...</string>
     <string name="ctxmenu_open_settings">App-Einstellungen...</string>
+    <string name="ctxmenu_select_multiple">Mehrere auswählen...</string>
 
     <!-- InputLabel -->
     <string name="label_zoom">Zoom</string>
@@ -156,6 +157,7 @@
     <string name="altdescr_ascend_group">Gruppe nach oben verschieben</string>
     <string name="altdescr_descend_group">Gruppe nach unten verschieben</string>
     <string name="altdescr_save">Speichern</string>
+    <string name="altdescr_selection_check">Ausgewählt</string>
     <string name="altdescr_delete_group">Gruppe löschen</string>
     <string name="altdescr_toggle_pin_visibility">PIN-Sichtbarkeit umschalten</string>
     <string name="altdescr_save_pin">PIN speichern</string>
@@ -229,6 +231,11 @@
     <string name="unit_fahrenheit">F</string>
     <string name="battery_temp" translatable="false">%1$d°%2$s</string>
     <string name="battery_temp_labeled" translatable="false">%1$d°%2$s (%3$s)</string>
+
+    <!-- Multi Select -->
+    <string name="multi_select_count">%d ausgewählt</string>
+    <string name="multi_select_move_to_group">In Gruppe verschieben</string>
+    <string name="multi_select_cancel">Abbrechen</string>
 
     <!-- Easter Egg -->
     <string name="easter_eggs_unlock">Kannst du bitte aufhören damit zu spielen xD</string>

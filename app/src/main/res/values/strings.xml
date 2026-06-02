@@ -115,6 +115,7 @@
     <string name="ctxmenu_rename_app">Rename app...</string>
     <string name="ctxmenu_add_to_favorites">Change group...</string>
     <string name="ctxmenu_open_settings">App settings...</string>
+    <string name="ctxmenu_select_multiple">Select multiple...</string>
 
     <!-- InputLabel -->
     <string name="label_zoom">Zoom</string>
@@ -155,6 +156,7 @@
     <string name="altdescr_ascend_group">Move group up</string>
     <string name="altdescr_descend_group">Move group down</string>
     <string name="altdescr_save">Save</string>
+    <string name="altdescr_selection_check">Selected</string>
     <string name="altdescr_delete_group">Delete group</string>
     <string name="altdescr_toggle_pin_visibility">Toggle PIN visibility</string>
     <string name="altdescr_save_pin">Save PIN</string>
@@ -228,6 +230,11 @@
     <string name="unit_fahrenheit">F</string>
     <string name="battery_temp" translatable="false">%1$d°%2$s</string>
     <string name="battery_temp_labeled" translatable="false">%1$d°%2$s (%3$s)</string>
+
+    <!-- Multi Select -->
+    <string name="multi_select_count">%d selected</string>
+    <string name="multi_select_move_to_group">Move to group</string>
+    <string name="multi_select_cancel">Cancel</string>
 
     <!-- Easter Egg -->
     <string name="easter_eggs_unlock">Can you please stop playing with it xD</string>
