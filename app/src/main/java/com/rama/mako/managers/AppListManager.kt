@@ -520,8 +520,8 @@ class AppListManager(
         multiSelectBar = root.findViewById(R.id.multi_select_bar)
         selectedCountText = root.findViewById(R.id.selected_count)
 
-        val moveButton = root.findViewById<Button>(R.id.move_to_group_button)
-        val cancelButton = root.findViewById<Button>(R.id.multi_select_cancel_button)
+        val moveButton = root.findViewById<FrameLayout>(R.id.move_to_group_button)
+        val cancelButton = root.findViewById<FrameLayout>(R.id.multi_select_cancel_button)
 
         moveButton.setOnClickListener { showBatchGroupsDialog() }
         cancelButton.setOnClickListener { exitMultiSelectMode() }

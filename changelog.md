@@ -10,6 +10,7 @@
 - Add pond wallpaper
 - Add double tap to put phone to sleep
 - Add date tap action
+- Add multiple selection for items when moving to a group
 
 ## 40
 - Add zoom control
