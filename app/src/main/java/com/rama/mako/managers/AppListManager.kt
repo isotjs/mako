@@ -520,7 +520,7 @@ class AppListManager(
 
     private fun setupMultiSelectBar() {
         val root = listView.rootView
-        multiSelectBar = root.findViewById(R.id.multi_select_bar)
+        multiSelectBar = root.findViewById(R.id.menu_bar)
         selectedCountText = root.findViewById(R.id.selected_count)
         renameButton = root.findViewById(R.id.rename_btn)
         appSettingsButton = root.findViewById(R.id.app_settings)
@@ -654,54 +654,6 @@ class AppListManager(
         }
         exitMultiSelectMode()
         refresh()
-    }
-
-    private fun showContextMenu(anchor: View, app: AppsProvider.AppEntry) {
-        val pkg = app.packageName
-        val view = LayoutInflater.from(context).inflate(R.layout.dialog_app_context_menu, null)
-
-        val dialog = android.app.Dialog(context)
-        dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
-        dialog.setContentView(view)
-        dialog.setCancelable(true)
-
-        // Actions
-        val actionRename = view.findViewById<TextView>(R.id.action_rename)
-        val actionGroup = view.findViewById<TextView>(R.id.action_group)
-        val actionAppSettings = view.findViewById<TextView>(R.id.action_app_settings)
-        val actionSelectMultiple = view.findViewById<TextView>(R.id.action_select_multiple)
-
-        actionRename.text = context.getString(R.string.ctxmenu_rename_app)
-        actionGroup.text = context.getString(R.string.ctxmenu_add_to_favorites)
-        actionAppSettings.text = context.getString(R.string.ctxmenu_open_settings)
-        actionSelectMultiple.text = context.getString(R.string.ctxmenu_select_multiple)
-
-        actionRename.setOnClickListener { dialog.dismiss(); showRenameDialog(app) }
-        actionGroup.setOnClickListener { dialog.dismiss(); showGroupsDialog(app) }
-        actionAppSettings.setOnClickListener { dialog.dismiss(); openAppSettings(pkg) }
-        actionSelectMultiple.setOnClickListener { dialog.dismiss(); enterMultiSelectMode(app) }
-
-        ThemeManager.applyTheme(context, view)
-        dialog.window?.setBackgroundDrawable(
-            android.graphics.drawable.ColorDrawable(
-                ThemeManager.paletteFor(prefs.getTheme()).bg_2
-            )
-        )
-        dialog.show()
-        dialog.window?.setLayout(
-            android.view.WindowManager.LayoutParams.WRAP_CONTENT,
-            android.view.WindowManager.LayoutParams.WRAP_CONTENT
-        )
-        dialog.window?.decorView?.minimumWidth = 0
-
-        // Position near the anchor view
-        val location = IntArray(2)
-        anchor.getLocationOnScreen(location)
-        val params = dialog.window?.attributes
-        params?.gravity = android.view.Gravity.TOP or android.view.Gravity.START
-        params?.x = location[0]
-        params?.y = location[1]
-        dialog.window?.attributes = params
     }
 
     private fun setupAdapter() {

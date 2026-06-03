@@ -134,7 +134,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/multi_select_bar"
+        android:id="@+id/menu_bar"
         android:visibility="gone"
         android:padding="4sp"
         style="@style/HorizontalList_BG2">
@@ -179,7 +179,7 @@
 
             <ImageView
                 android:src="@drawable/icon_folder_enter_solid"
-                android:contentDescription="@string/multi_select_move_to_group"
+                android:contentDescription="@string/ctxmenu_move_to_group"
                 style="@style/Icon24" />
         </FrameLayout>
 
@@ -191,7 +191,7 @@
 
             <ImageView
                 android:src="@drawable/icon_cog_solid"
-                android:contentDescription="Settings"
+                android:contentDescription="@string/ctxmenu_open_settings"
                 style="@style/Icon24" />
         </FrameLayout>
 

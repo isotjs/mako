@@ -116,9 +116,8 @@
 
     <!-- ContextMenu -->
     <string name="ctxmenu_rename_app">Rename app...</string>
-    <string name="ctxmenu_add_to_favorites">Change group...</string>
+    <string name="ctxmenu_move_to_group">Change group...</string>
     <string name="ctxmenu_open_settings">App settings...</string>
-    <string name="ctxmenu_select_multiple">Select multiple...</string>
 
     <!-- InputLabel -->
     <string name="label_zoom">Zoom</string>
