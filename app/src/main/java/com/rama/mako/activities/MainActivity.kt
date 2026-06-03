@@ -82,7 +82,7 @@ class MainActivity : CsActivity() {
                 applyHomeBackground()
             }
         }
-    }
+        }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         return when (keyCode) {
@@ -153,21 +153,17 @@ class MainActivity : CsActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (appListManager.handleBackPress()) return
-        setupBackHandling()
-    }
 
-    private fun setupBackHandling() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            backCallback = OnBackInvokedCallback {
                 if (isSearchBarAlwaysVisible) {
                     searchField.clearFocus()
-                    val imm = getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-                    imm.hideSoftInputFromWindow(searchField.windowToken, 0)
                 } else if (isSearchExpanded) {
                     collapseSearch()
+                } else {
+                    finish()
                 }
             }
         })
+
     }
 
     private fun initDoubleTapToSleep() {
@@ -304,10 +300,6 @@ class MainActivity : CsActivity() {
 
         searchDebounceRunnable?.let { searchDebounceHandler.removeCallbacks(it) }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && backCallback != null) {
-            onBackInvokedDispatcher.unregisterOnBackInvokedCallback(backCallback!!)
-        }
-
         batteryManager.unregister()
         clockManager.stop()
     }
@@ -319,17 +311,6 @@ class MainActivity : CsActivity() {
         return super.dispatchTouchEvent(ev)
     }
     
-    override fun onBackPressed() {
-        if (isSearchBarAlwaysVisible) {
-            searchField.clearFocus()
-            val imm =
-                getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-            imm.hideSoftInputFromWindow(searchField.windowToken, 0)
-        } else if (isSearchExpanded) {
-            collapseSearch()
-        }
-    }
-
     private fun syncSettings() {
         val searchVisible = prefs.isSearchVisible()
 
