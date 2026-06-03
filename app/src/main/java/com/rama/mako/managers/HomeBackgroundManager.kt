@@ -42,6 +42,41 @@ class HomeBackgroundManager(context: Context) {
         }.getOrNull()
     }
 
+    fun createBackgroundDrawable(mode: String): Drawable {
+        return when (mode) {
+            PrefsManager.BackgroundMode.WALLPAPER -> ColorDrawable(
+                ContextCompat.getColor(
+                    appContext,
+                    R.color.bg_1
+                )
+            )
+
+            else -> ColorDrawable(ContextCompat.getColor(appContext, R.color.bg_1))
+        }
+    }
+
+    private fun resolveWallpaperScrimColor(): Int {
+        val fallback = ContextCompat.getColor(appContext, R.color.bg_wallpaper_scrim)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return fallback
+
+        val wallpaperColors = runCatching {
+            wallpaperManager.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
+        }.getOrNull() ?: return fallback
+
+        val hints = wallpaperColors.colorHints
+        val alpha = when {
+            hints and WallpaperColors.HINT_SUPPORTS_DARK_TEXT != 0 -> 0xB8
+            hints and WallpaperColors.HINT_SUPPORTS_DARK_THEME != 0 -> 0x7A
+            else -> 0x96
+        }
+
+        return ColorUtils.setAlphaComponent(Color.BLACK, alpha)
+    }
+
+    private fun supportsWallpaperReactiveBackground(): Boolean {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1
+    }
+
     private fun darkenForReadability(color: Int): Int {
         var tuned = ColorUtils.blendARGB(color, Color.BLACK, 0.62f)
         var iterations = 0

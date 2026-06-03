@@ -1,14 +1,13 @@
 package com.rama.mako.activities
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.window.OnBackInvokedCallback
+import androidx.activity.OnBackPressedCallback
 import com.rama.mako.CsActivity
 import com.rama.mako.R
 
@@ -27,8 +26,6 @@ class LockActivity : CsActivity() {
     private val easterEggThreshold = 32
     private val easterEggCounterStart = 22
 
-    private var backCallback: OnBackInvokedCallback? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -42,10 +39,15 @@ class LockActivity : CsActivity() {
             WindowManager.LayoutParams.FLAG_SECURE
         )
 
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                navigateToHome()
+            }
+        })
+
         setupViews()
         setupActions()
         setupKeypad()
-        setupBackHandling()
         clearPin()
     }
 
@@ -69,35 +71,12 @@ class LockActivity : CsActivity() {
         )
     }
 
-    override fun onBackPressed() {
-        navigateToHome()
-    }
-
     private fun navigateToHome() {
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
         startActivity(intent)
         finish()
-    }
-
-    private fun setupBackHandling() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            backCallback = OnBackInvokedCallback {
-                navigateToHome()
-            }
-            onBackInvokedDispatcher.registerOnBackInvokedCallback(
-                android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                backCallback!!
-            )
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && backCallback != null) {
-            onBackInvokedDispatcher.unregisterOnBackInvokedCallback(backCallback!!)
-        }
     }
 
     private fun setupKeypad() {
