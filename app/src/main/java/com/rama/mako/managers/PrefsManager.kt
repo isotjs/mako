@@ -58,9 +58,10 @@ class PrefsManager private constructor(context: Context) {
         const val APPS_ICON_PACK_PACKAGE = "apps:icon_pack_package"
         const val APPS_PROFILE_INDICATOR = "apps:profile_indicator"
 
-        //        const val APPS_SHOW_HIDDEN = "apps:show_hidden"
         const val HOME_BACKGROUND_MODE = "home:background_mode"
         const val HOME_DOUBLE_TAP_SLEEP = "home:double_tap_sleep"
+        const val HOME_BACKGROUND_MODE_SCREEN_OPACITY_STRENGTH =
+            "home:background_mode:screen_opacity_strength"
         const val GROUPS_IDS = "groups:ids"
         const val GROUPS_HEADERS = "groups:headers"
         const val GROUPS_COLLAPSIBLE = "groups:collapsible"
@@ -78,6 +79,7 @@ class PrefsManager private constructor(context: Context) {
         const val APP_LANGUAGE = "app:language"
         const val MIGRATION_ICON_SOURCE_RADIO = "migration:icon_source_radio"
         const val SYSTEM_BAR_VISIBLE = "system:bar:visible"
+        const val SYSTEM_PREVENT_ROTATION = "system:prevent_rotation"
 
         const val APP_THEME_NAME = "app:theme:name"
         const val APP_THEME_H1 = "app:theme:clock"
@@ -175,6 +177,7 @@ class PrefsManager private constructor(context: Context) {
         const val RAMA = "rama"
         const val MAKO = "mako"
         const val CATPPUCCIN_MOCHA = "catppuccin_mocha"
+        const val CATPPUCCIN_LATTE = "catppuccin_latte"
         const val DRACULA = "dracula"
         const val MELANGE = "melange"
         const val TOKYO_NIGHT = "tokyo_night"
@@ -219,7 +222,9 @@ class PrefsManager private constructor(context: Context) {
                 .putString(PrefKeys.APPS_ICON_PACK_PACKAGE, "")
                 .putString(PrefKeys.HOME_BACKGROUND_MODE, BackgroundMode.DEFAULT)
                 .putBoolean(PrefKeys.HOME_DOUBLE_TAP_SLEEP, false)
+                .putInt(PrefKeys.HOME_BACKGROUND_MODE_SCREEN_OPACITY_STRENGTH, 9)
                 .putBoolean(PrefKeys.SYSTEM_BAR_VISIBLE, false)
+                .putBoolean(PrefKeys.SYSTEM_PREVENT_ROTATION, false)
 
                 .putString(PrefKeys.APP_THEME_NAME, Theme.DRACULA)
 
@@ -239,6 +244,7 @@ class PrefsManager private constructor(context: Context) {
 
                 .putBoolean(PrefKeys.SETTINGS_SECTION_CLOCK, true)
                 .putBoolean(PrefKeys.SETTINGS_SECTION_TEMPERATURE, true)
+
                 .putBoolean(PrefKeys.SETTINGS_SECTION_BACKGROUND, true)
                 .putBoolean(PrefKeys.SETTINGS_SECTION_DATE, true)
                 .putBoolean(PrefKeys.SETTINGS_SECTION_BATTERY, true)
@@ -469,6 +475,14 @@ class PrefsManager private constructor(context: Context) {
     // SETTINGS - FONT
 
     // SETTINGS - BACKGROUND
+
+    fun getHomeBackgroundScreenOpacityStrength(): Int {
+        return prefs.getInt(PrefKeys.HOME_BACKGROUND_MODE_SCREEN_OPACITY_STRENGTH, 9)
+    }
+
+    fun setHomeBackgroundScreenOpacityStrength(strength: Int) {
+        prefs.edit().putInt(PrefKeys.HOME_BACKGROUND_MODE_SCREEN_OPACITY_STRENGTH, strength).apply()
+    }
 
     fun getHomeBackgroundMode(): String {
         return when (prefs.getString(PrefKeys.HOME_BACKGROUND_MODE, BackgroundMode.DEFAULT)) {

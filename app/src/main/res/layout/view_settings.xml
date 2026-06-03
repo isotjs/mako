@@ -52,9 +52,12 @@
 
                 <com.rama.mako.widgets.WdCheckbox
                     android:id="@+id/double_tap_sleep"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/double_tap_sleep_label"
+                    style="@style/Checkbox" />
+              
+                <com.rama.mako.widgets.WdCheckbox
+                    android:id="@+id/prevent_home_screen_rotation"
+                    android:text="@string/checkbox_prevent_home_screen_rotation"
                     style="@style/Checkbox" />
 
                 <LinearLayout style="@style/VerticalListDivided_BG2">
@@ -128,6 +131,11 @@
                     <RadioButton
                         android:id="@+id/theme_catppuccin_mocha"
                         android:text="@string/product_catppuccin_name"
+                        style="@style/Radio" />
+
+                    <RadioButton
+                        android:id="@+id/theme_catppuccin_latte"
+                        android:text="@string/product_catppuccin_latte_name"
                         style="@style/Radio" />
 
                     <RadioButton
@@ -231,6 +239,7 @@
                     </LinearLayout>
                 </LinearLayout>
             </com.rama.mako.widgets.WdCollapsibleSection>
+
             <!--Background-->
             <com.rama.mako.widgets.WdCollapsibleSection
                 android:layout_width="match_parent"
@@ -243,6 +252,20 @@
                     android:id="@+id/home_background_wallpaper"
                     android:text="@string/radio_background_wallpaper"
                     style="@style/Checkbox" />
+
+                <LinearLayout
+                    android:id="@+id/screen_opacity_container"
+                    style="@style/VerticalListDivided_BG2">
+
+                    <TextView
+                        android:text="@string/label_screen_opacity_strength"
+                        style="@style/Text" />
+
+                    <com.rama.mako.widgets.WdRange
+                        android:id="@+id/screen_opacity"
+                        app:valuesArray="@array/wallpaper_screen_opacity_strength"
+                        style="@style/BlockFlow" />
+                </LinearLayout>
 
                 <Button
                     android:id="@+id/wallpaper_button"

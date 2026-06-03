@@ -27,6 +27,7 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
         setupTheme()
         setupCustomTheme()
         setupBackgroundMode()
+        setupScreenOpacity()
         setupUiScale()
     }
 
@@ -144,6 +145,7 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
             PrefsManager.Theme.RAMA -> group.check(R.id.theme_rama)
             PrefsManager.Theme.MAKO -> group.check(R.id.theme_mako)
             PrefsManager.Theme.CATPPUCCIN_MOCHA -> group.check(R.id.theme_catppuccin_mocha)
+            PrefsManager.Theme.CATPPUCCIN_LATTE -> group.check(R.id.theme_catppuccin_latte)
             PrefsManager.Theme.DRACULA -> group.check(R.id.theme_dracula)
             PrefsManager.Theme.MELANGE -> group.check(R.id.theme_melange)
             PrefsManager.Theme.TOKYO_NIGHT -> group.check(R.id.theme_tokyo_night)
@@ -156,6 +158,7 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
                 R.id.theme_rama -> PrefsManager.Theme.RAMA
                 R.id.theme_mako -> PrefsManager.Theme.MAKO
                 R.id.theme_catppuccin_mocha -> PrefsManager.Theme.CATPPUCCIN_MOCHA
+                R.id.theme_catppuccin_latte -> PrefsManager.Theme.CATPPUCCIN_LATTE
                 R.id.theme_dracula -> PrefsManager.Theme.DRACULA
                 R.id.theme_melange -> PrefsManager.Theme.MELANGE
                 R.id.theme_tokyo_night -> PrefsManager.Theme.TOKYO_NIGHT
@@ -232,19 +235,42 @@ class SettingsAppearanceController(private val activity: SettingsActivity) {
 
     private fun setupBackgroundMode() {
         val checkbox = activity.findViewById<WdCheckbox>(R.id.home_background_wallpaper)
+        val opacityContainer = activity.findViewById<View>(R.id.screen_opacity_container)
 
-        val initialMode = prefs.getHomeBackgroundMode()
-        checkbox.setChecked(initialMode == PrefsManager.BackgroundMode.WALLPAPER)
+        val isWallpaper = prefs.getHomeBackgroundMode() == PrefsManager.BackgroundMode.WALLPAPER
+        checkbox.setChecked(isWallpaper)
+        opacityContainer.visibility = if (isWallpaper) View.VISIBLE else View.GONE
 
         checkbox.setOnCheckedChangeListener { isChecked ->
-            val mode = if (isChecked) {
-                PrefsManager.BackgroundMode.WALLPAPER
-            } else {
-                PrefsManager.BackgroundMode.DEFAULT
-            }
-
+            opacityContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
+            val mode =
+                if (isChecked) PrefsManager.BackgroundMode.WALLPAPER else PrefsManager.BackgroundMode.DEFAULT
             prefs.setHomeBackgroundMode(mode)
             activity.applySettingsBackground()
+        }
+    }
+
+    private fun setupScreenOpacity() {
+        val range = activity.findViewById<WdRange>(R.id.screen_opacity)
+
+        val steps =
+            activity.resources.getStringArray(R.array.wallpaper_screen_opacity_strength).toList()
+        val savedStrength = prefs.getHomeBackgroundScreenOpacityStrength()
+        val matchIndex = steps.indexOfFirst { it.toIntOrNull() == savedStrength }
+
+        if (matchIndex >= 0) {
+            range.post {
+                val container = range.findViewById<android.widget.LinearLayout>(R.id.container)
+                (container?.getChildAt(matchIndex) as? android.widget.Button)?.performClick()
+            }
+        }
+
+        range.onValueChanged = { value ->
+            val strength = value.toIntOrNull()
+            if (strength != null && strength != prefs.getHomeBackgroundScreenOpacityStrength()) {
+                prefs.setHomeBackgroundScreenOpacityStrength(strength)
+                activity.applySettingsBackground(force = true)
+            }
         }
     }
 

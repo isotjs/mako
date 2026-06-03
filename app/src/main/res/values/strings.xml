@@ -112,6 +112,7 @@
     <string name="checkbox_show_group_header">Show group header</string>
     <string name="checkbox_randomized_keypad">Randomized keypad</string>
     <string name="checkbox_always_show_search_bar">Always visible</string>
+    <string name="checkbox_prevent_home_screen_rotation">Lock screen rotation</string>
 
     <!-- ContextMenu -->
     <string name="ctxmenu_rename_app">Rename app...</string>
@@ -121,6 +122,7 @@
 
     <!-- InputLabel -->
     <string name="label_zoom">Zoom</string>
+    <string name="label_screen_opacity_strength">Screen opacity strength</string>
 
     <!-- InputHints -->
     <string name="hint_search_apps">Search apps...</string>
@@ -186,6 +188,7 @@
     <string name="product_dracula_url" translatable="false">github.com/dracula</string>
     <string name="product_catppuccin_creator" translatable="false">Pocco</string>
     <string name="product_catppuccin_name" translatable="false">Catppuccin Moccha</string>
+    <string name="product_catppuccin_latte_name" translatable="false">Catppuccin Latte</string>
     <string name="product_catppuccin_url" translatable="false">github.com/catppuccin</string>
     <string name="product_tokyo_creator" translatable="false">Enkia</string>
     <string name="product_tokyo_name" translatable="false">Tokyo Night</string>

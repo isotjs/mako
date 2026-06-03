@@ -15,6 +15,4 @@
     <color name="button_2">#6194AF</color>
     <color name="danger">#DC6364</color>
     <color name="collapsible_header">#878787</color>
-
-    <color name="bg_wallpaper_scrim">#99000000</color>
 </resources>

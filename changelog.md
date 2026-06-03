@@ -1,5 +1,14 @@
 # Changelog
 
+## 41
+- Screen opacity control
+- Fix navigation bar color + opacity
+- Add catppuccin latte light theme
+- Prevent screen rotation checkbox
+- Add clouds wallpaper
+- Add mountains wallpaper
+- Add pond wallpaper
+
 ## 40
 - Add zoom control
 - Prevent non letter for been the initial of the profiles
