@@ -58,6 +58,9 @@ class AppListManager(
     private val selectedApps = mutableSetOf<String>()
     private var multiSelectBar: LinearLayout? = null
     private var selectedCountText: TextView? = null
+    private var renameButton: FrameLayout? = null
+    private var appSettingsButton: FrameLayout? = null
+    private var suppressNextClick = false
 
     fun setup() {
         updateAppsCache()
@@ -519,12 +522,34 @@ class AppListManager(
         val root = listView.rootView
         multiSelectBar = root.findViewById(R.id.multi_select_bar)
         selectedCountText = root.findViewById(R.id.selected_count)
+        renameButton = root.findViewById(R.id.rename_btn)
+        appSettingsButton = root.findViewById(R.id.app_settings)
 
         val moveButton = root.findViewById<FrameLayout>(R.id.move_to_group_button)
         val cancelButton = root.findViewById<FrameLayout>(R.id.multi_select_cancel_button)
 
         moveButton.setOnClickListener { showBatchGroupsDialog() }
         cancelButton.setOnClickListener { exitMultiSelectMode() }
+
+        renameButton?.setOnClickListener {
+            getSingleSelectedApp()?.let { app ->
+                exitMultiSelectMode()
+                showRenameDialog(app)
+            }
+        }
+
+        appSettingsButton?.setOnClickListener {
+            getSingleSelectedApp()?.let { app ->
+                exitMultiSelectMode()
+                openAppSettings(app.packageName)
+            }
+        }
+    }
+
+    private fun getSingleSelectedApp(): AppsProvider.AppEntry? {
+        if (selectedApps.size != 1) return null
+        val key = selectedApps.first()
+        return allAppsCache.find { getSelectionKey(it) == key }
     }
 
     private fun enterMultiSelectMode(app: AppsProvider.AppEntry) {
@@ -563,6 +588,9 @@ class AppListManager(
             R.string.multi_select_count,
             selectedApps.size
         )
+        val isSingle = selectedApps.size == 1
+        renameButton?.visibility = if (isSingle) View.VISIBLE else View.GONE
+        appSettingsButton?.visibility = if (isSingle) View.VISIBLE else View.GONE
     }
 
     private fun showBatchGroupsDialog() {
@@ -753,7 +781,9 @@ class AppListManager(
                             icon.setImageDrawable(drawable)
                             icon.visibility = View.VISIBLE
                             icon.setOnClickListener {
-                                if (isMultiSelectMode) {
+                                if (suppressNextClick) {
+                                    suppressNextClick = false
+                                } else if (isMultiSelectMode) {
                                     toggleSelection(app)
                                 } else if (!appsProvider.launch(app)) {
                                     Toast.makeText(
@@ -770,7 +800,8 @@ class AppListManager(
                                 if (isMultiSelectMode) {
                                     toggleSelection(app); true
                                 } else {
-                                    showContextMenu(it, app); true
+                                    suppressNextClick = true
+                                    enterMultiSelectMode(app); true
                                 }
                             }
                         } else {
@@ -782,7 +813,9 @@ class AppListManager(
                         label.text = getDisplayName(app)
 
                         val launchOrToggle: () -> Unit = {
-                            if (isMultiSelectMode) {
+                            if (suppressNextClick) {
+                                suppressNextClick = false
+                            } else if (isMultiSelectMode) {
                                 toggleSelection(app)
                             } else if (!appsProvider.launch(app)) {
                                 Toast.makeText(
@@ -803,7 +836,8 @@ class AppListManager(
                             if (isMultiSelectMode) {
                                 toggleSelection(app); true
                             } else {
-                                showContextMenu(it, app); true
+                                suppressNextClick = true
+                                enterMultiSelectMode(app); true
                             }
                         }
                         emptySpace.setOnLongClickListener {
@@ -834,6 +868,10 @@ class AppListManager(
         }
 
         listView.setOnItemClickListener { _, _, position, _ ->
+            if (suppressNextClick) {
+                suppressNextClick = false
+                return@setOnItemClickListener
+            }
             when (val item = items[position]) {
                 is ListItem.Header -> {
                     if (prefs.hasCollapsibleGroups()) {
