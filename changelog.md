@@ -8,6 +8,8 @@
 - Add clouds wallpaper
 - Add mountains wallpaper
 - Add pond wallpaper
+- Add double tap to put phone to sleep
+- Add date tap action
 
 ## 40
 - Add zoom control

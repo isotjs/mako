@@ -41,16 +41,4 @@ class HomeBackgroundManager(context: Context) {
             wallpaperManager.getWallpaperId(WallpaperManager.FLAG_SYSTEM)
         }.getOrNull()
     }
-
-    private fun darkenForReadability(color: Int): Int {
-        var tuned = ColorUtils.blendARGB(color, Color.BLACK, 0.62f)
-        var iterations = 0
-
-        while (ColorUtils.calculateLuminance(tuned) > 0.15 && iterations < 5) {
-            tuned = ColorUtils.blendARGB(tuned, Color.BLACK, 0.25f)
-            iterations++
-        }
-
-        return tuned
-    }
 }
