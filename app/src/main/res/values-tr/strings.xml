@@ -113,6 +113,7 @@
     <string name="checkbox_show_group_header">Grup başlığını göster</string>
     <string name="checkbox_randomized_keypad">Rastgele tuş takımı</string>
     <string name="checkbox_always_show_search_bar">Her zaman görünür</string>
+    <string name="checkbox_prevent_home_screen_rotation">Ekran döndürmeyi kilitle</string>
 
     <!-- ContextMenu -->
     <string name="ctxmenu_rename_app">Uygulamayı yeniden adlandır...</string>
@@ -121,6 +122,7 @@
 
     <!-- InputLabel -->
     <string name="label_zoom">Yakınlaştırma</string>
+    <string name="label_screen_opacity_strength">Ekran opaklık seviyesi</string>
 
     <!-- InputHints -->
     <string name="hint_search_apps">Uygulama ara...</string>

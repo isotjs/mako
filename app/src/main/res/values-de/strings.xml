@@ -113,6 +113,7 @@
     <string name="checkbox_show_group_header">Gruppenüberschrift anzeigen</string>
     <string name="checkbox_randomized_keypad">Zufälliges Tastenfeld</string>
     <string name="checkbox_always_show_search_bar">Immer anzeigen</string>
+    <string name="checkbox_prevent_home_screen_rotation">Bildschirmrotation sperren</string>
 
     <!-- ContextMenu -->
     <string name="ctxmenu_rename_app">App umbenennen...</string>
@@ -121,6 +122,7 @@
 
     <!-- InputLabel -->
     <string name="label_zoom">Zoom</string>
+    <string name="label_screen_opacity_strength">Bildschirmdeckkraft</string>
 
     <!-- InputHints -->
     <string name="hint_search_apps">Nach Apps suchen...</string>
