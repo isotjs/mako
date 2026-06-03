@@ -44,16 +44,38 @@ class AppListManager(
     private lateinit var adapter: ArrayAdapter<ListItem>
     private var allAppsCache: List<AppsProvider.AppEntry> = emptyList()
     private val searchableNameCache = mutableMapOf<String, String>()
+    private val packageNameCache = mutableMapOf<String, String>()
     private val combiningMarkRegex = Regex("\\p{M}+")
     private val tokenSeparatorRegex = Regex("[^a-z0-9]+")
-    private val specialCharRegex = Regex("[^a-z0-9\\s]+")
+    private val specialCharRegex = Regex("[^a-z0-9]+")
+
+    private companion object {
+        private const val PACKAGE_SCORE_PENALTY = 2000
+        private const val GROUP_SCORE_PENALTY = 4000
+    }
+
+    private var isMultiSelectMode = false
+    private val selectedApps = mutableSetOf<String>()
+    private var multiSelectBar: LinearLayout? = null
+    private var selectedCountText: TextView? = null
 
     fun setup() {
         updateAppsCache()
         buildItems()
+        setupMultiSelectBar()
         setupAdapter()
         setupScrollListener()
     }
+
+    fun handleBackPress(): Boolean {
+        if (isMultiSelectMode) {
+            exitMultiSelectMode()
+            return true
+        }
+        return false
+    }
+
+    fun isInMultiSelectMode(): Boolean = isMultiSelectMode
 
     fun refresh() {
         updateAppsCache()
@@ -64,6 +86,7 @@ class AppListManager(
     private fun updateAppsCache() {
         allAppsCache = appsProvider.getAll()
         searchableNameCache.clear()
+        packageNameCache.clear()
     }
 
     private fun buildItems() {
@@ -118,6 +141,12 @@ class AppListManager(
         val key = getAppCacheKey(app)
         return searchableNameCache.getOrPut(key) {
             normalizeForSearch(getDisplayName(app))
+        }
+    }
+
+    private fun getSearchablePackageName(app: AppsProvider.AppEntry): String {
+        return packageNameCache.getOrPut(app.packageName) {
+            stripSpecialChars(normalizeForSearch(app.packageName))
         }
     }
 
@@ -302,19 +331,31 @@ class AppListManager(
             val isVisible = prefs.isGroupVisible(groupId)
             if (!isVisible) return@forEach
 
+            val label = prefs.getGroupLabel(groupId)
+            val normalizedGroupLabel = normalizeForSearch(label)
+            val strippedGroupLabel = stripSpecialChars(normalizedGroupLabel)
+            val groupLabelScore = scoreMatch(strippedGroupLabel, strippedQuery)
+
             val matchedApps = apps.mapNotNull { app ->
                 val normalizedName = getSearchableName(app)
                 val strippedName = stripSpecialChars(normalizedName)
-                val score = scoreMatch(strippedName, strippedQuery) ?: return@mapNotNull null
-                ScoredApp(app = app, score = score, normalizedName = normalizedName)
+                val displayScore = scoreMatch(strippedName, strippedQuery)
+
+                if (displayScore != null) {
+                    ScoredApp(app = app, score = displayScore, normalizedName = normalizedName)
+                } else {
+                    val packageScore = scoreMatch(getSearchablePackageName(app), strippedQuery)
+                    val score = packageScore?.let { it + PACKAGE_SCORE_PENALTY }
+                        ?: groupLabelScore?.let { it + GROUP_SCORE_PENALTY }
+                        ?: return@mapNotNull null
+                    ScoredApp(app = app, score = score, normalizedName = normalizedName)
+                }
             }.sortedWith(
                 compareBy<ScoredApp> { it.score }
                     .thenBy { it.normalizedName }
             )
 
             if (matchedApps.isEmpty()) return@forEach
-
-            val label = prefs.getGroupLabel(groupId)
 
             matchedGroups.add(
                 GroupMatch(
@@ -470,6 +511,123 @@ class AppListManager(
         dialog.show()
     }
 
+    private fun getSelectionKey(app: AppsProvider.AppEntry): String {
+        return "${app.packageName}:${app.userHandle.hashCode()}"
+    }
+
+    private fun setupMultiSelectBar() {
+        val root = listView.rootView
+        multiSelectBar = root.findViewById(R.id.multi_select_bar)
+        selectedCountText = root.findViewById(R.id.selected_count)
+
+        val moveButton = root.findViewById<Button>(R.id.move_to_group_button)
+        val cancelButton = root.findViewById<Button>(R.id.multi_select_cancel_button)
+
+        moveButton.setOnClickListener { showBatchGroupsDialog() }
+        cancelButton.setOnClickListener { exitMultiSelectMode() }
+    }
+
+    private fun enterMultiSelectMode(app: AppsProvider.AppEntry) {
+        isMultiSelectMode = true
+        selectedApps.clear()
+        selectedApps.add(getSelectionKey(app))
+        multiSelectBar?.visibility = View.VISIBLE
+        updateMultiSelectBar()
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun exitMultiSelectMode() {
+        isMultiSelectMode = false
+        selectedApps.clear()
+        multiSelectBar?.visibility = View.GONE
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun toggleSelection(app: AppsProvider.AppEntry) {
+        val key = getSelectionKey(app)
+        if (key in selectedApps) {
+            selectedApps.remove(key)
+            if (selectedApps.isEmpty()) {
+                exitMultiSelectMode()
+                return
+            }
+        } else {
+            selectedApps.add(key)
+        }
+        updateMultiSelectBar()
+        adapter.notifyDataSetChanged()
+    }
+
+    private fun updateMultiSelectBar() {
+        selectedCountText?.text = context.getString(
+            R.string.multi_select_count,
+            selectedApps.size
+        )
+    }
+
+    private fun showBatchGroupsDialog() {
+        val view = View.inflate(context, R.layout.dialog_groups_pick, null)
+
+        val dialog = AlertDialog.Builder(context)
+            .setView(view)
+            .setCancelable(true)
+            .create()
+
+        val closeBtn = view.findViewById<View>(R.id.close_button)
+        val container = view.findViewById<RadioGroup>(R.id.groups)
+
+        fun renderGroups() {
+            container.removeAllViews()
+            val radioGroup = RadioGroup(context)
+
+            val groupIds = GroupsManager(context, appsProvider).getGroupIds()
+
+            groupIds.forEachIndexed { index, groupId ->
+                val isLast = index == groupIds.lastIndex
+                val label = prefs.getGroupLabel(groupId)
+
+                val radio = RadioButton(context).apply {
+                    id = generateViewId()
+                    text = label
+                    layoutParams = RadioGroup.LayoutParams(
+                        RadioGroup.LayoutParams.MATCH_PARENT,
+                        RadioGroup.LayoutParams.WRAP_CONTENT
+                    ).apply {
+                        bottomMargin = if (isLast) 0 else context.sp(8f)
+                    }
+                }
+
+                ThemeManager.applyTheme(context, radio)
+
+                radio.setOnClickListener {
+                    batchAssignToGroup(groupId)
+                    dialog.dismiss()
+                }
+
+                radioGroup.addView(radio)
+            }
+
+            container.addView(radioGroup)
+        }
+
+        renderGroups()
+        closeBtn.setOnClickListener { dialog.dismiss() }
+
+        ThemeManager.applyTheme(context, view)
+        dialog.show()
+    }
+
+    private fun batchAssignToGroup(groupId: String) {
+        for (key in selectedApps) {
+            val app = allAppsCache.find { getSelectionKey(it) == key }
+            if (app != null) {
+                prefs.setAppGroupId(app.packageName, app.userHandle, groupId)
+            }
+        }
+        exitMultiSelectMode()
+        refresh()
+    }
+
     private fun showContextMenu(anchor: View, app: AppsProvider.AppEntry) {
         val pkg = app.packageName
         val view = LayoutInflater.from(context).inflate(R.layout.dialog_app_context_menu, null)
@@ -483,14 +641,17 @@ class AppListManager(
         val actionRename = view.findViewById<TextView>(R.id.action_rename)
         val actionGroup = view.findViewById<TextView>(R.id.action_group)
         val actionAppSettings = view.findViewById<TextView>(R.id.action_app_settings)
+        val actionSelectMultiple = view.findViewById<TextView>(R.id.action_select_multiple)
 
         actionRename.text = context.getString(R.string.ctxmenu_rename_app)
         actionGroup.text = context.getString(R.string.ctxmenu_add_to_favorites)
         actionAppSettings.text = context.getString(R.string.ctxmenu_open_settings)
+        actionSelectMultiple.text = context.getString(R.string.ctxmenu_select_multiple)
 
         actionRename.setOnClickListener { dialog.dismiss(); showRenameDialog(app) }
         actionGroup.setOnClickListener { dialog.dismiss(); showGroupsDialog(app) }
         actionAppSettings.setOnClickListener { dialog.dismiss(); openAppSettings(pkg) }
+        actionSelectMultiple.setOnClickListener { dialog.dismiss(); enterMultiSelectMode(app) }
 
         ThemeManager.applyTheme(context, view)
         dialog.window?.setBackgroundDrawable(
@@ -573,9 +734,18 @@ class AppListManager(
                         val pkg = app.packageName
                         val label = view.findViewById<TextView>(R.id.open_app_button)
                         val emptySpace = view.findViewById<View>(R.id.empty_space)
+                        val selectionCheck = view.findViewById<ImageView>(R.id.selection_check)
 
                         val icon = view.findViewById<ImageView>(R.id.app_icon)
                         val showIcons = prefs.hasIconsVisible()
+
+                        val key = getSelectionKey(app)
+                        if (isMultiSelectMode) {
+                            selectionCheck.visibility = View.VISIBLE
+                            selectionCheck.alpha = if (key in selectedApps) 1f else 0.3f
+                        } else {
+                            selectionCheck.visibility = View.GONE
+                        }
 
                         if (showIcons) {
                             val drawable = iconManager.getIcon(app)
@@ -583,7 +753,9 @@ class AppListManager(
                             icon.setImageDrawable(drawable)
                             icon.visibility = View.VISIBLE
                             icon.setOnClickListener {
-                                if (!appsProvider.launch(app)) {
+                                if (isMultiSelectMode) {
+                                    toggleSelection(app)
+                                } else if (!appsProvider.launch(app)) {
                                     Toast.makeText(
                                         context,
                                         context.getString(R.string.toast_unable_launch_app),
@@ -594,7 +766,13 @@ class AppListManager(
                                     onAppLaunched?.invoke()
                                 }
                             }
-                            icon.setOnLongClickListener { showContextMenu(it, app); true }
+                            icon.setOnLongClickListener {
+                                if (isMultiSelectMode) {
+                                    toggleSelection(app); true
+                                } else {
+                                    showContextMenu(it, app); true
+                                }
+                            }
                         } else {
                             icon.visibility = View.GONE
                             icon.setImageDrawable(null)
@@ -603,20 +781,10 @@ class AppListManager(
 
                         label.text = getDisplayName(app)
 
-                        label.setOnClickListener {
-                            if (!appsProvider.launch(app)) {
-                                Toast.makeText(
-                                    context,
-                                    context.getString(R.string.toast_unable_launch_app),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                refresh()
-                            } else {
-                                onAppLaunched?.invoke()
-                            }
-                        }
-                        emptySpace.setOnClickListener {
-                            if (!appsProvider.launch(app)) {
+                        val launchOrToggle: () -> Unit = {
+                            if (isMultiSelectMode) {
+                                toggleSelection(app)
+                            } else if (!appsProvider.launch(app)) {
                                 Toast.makeText(
                                     context,
                                     context.getString(R.string.toast_unable_launch_app),
@@ -628,10 +796,23 @@ class AppListManager(
                             }
                         }
 
-                        label.setOnLongClickListener { showContextMenu(it, app); true }
+                        label.setOnClickListener { launchOrToggle() }
+                        emptySpace.setOnClickListener { launchOrToggle() }
+
+                        label.setOnLongClickListener {
+                            if (isMultiSelectMode) {
+                                toggleSelection(app); true
+                            } else {
+                                showContextMenu(it, app); true
+                            }
+                        }
                         emptySpace.setOnLongClickListener {
-                            context.startActivity(Intent(context, SettingsActivity::class.java))
-                            true
+                            if (isMultiSelectMode) {
+                                toggleSelection(app); true
+                            } else {
+                                context.startActivity(Intent(context, SettingsActivity::class.java))
+                                true
+                            }
                         }
 
                         ThemeManager.applyTheme(context, label)
@@ -663,7 +844,9 @@ class AppListManager(
                 }
 
                 is ListItem.App -> {
-                    if (!appsProvider.launch(item.info)) {
+                    if (isMultiSelectMode) {
+                        toggleSelection(item.info)
+                    } else if (!appsProvider.launch(item.info)) {
                         Toast.makeText(
                             context,
                             context.getString(R.string.toast_unable_launch_app),

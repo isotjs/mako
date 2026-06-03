@@ -1,6 +1,5 @@
 package com.rama.mako
 
-import android.app.Activity
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
@@ -11,11 +10,12 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import com.rama.mako.managers.FontManager
 import com.rama.mako.managers.ThemeManager
+import androidx.activity.ComponentActivity
 import com.rama.mako.utils.dp
 import com.rama.mako.managers.PrefsManager
 import com.rama.mako.utils.LocaleHelper
 
-abstract class CsActivity : Activity() {
+abstract class CsActivity : ComponentActivity() {
 
     val prefs by lazy { PrefsManager.getInstance(this) }
     private var lastKnownAppLanguage: String? = null
