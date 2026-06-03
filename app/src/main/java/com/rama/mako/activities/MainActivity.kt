@@ -2,16 +2,21 @@ package com.rama.mako.activities
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.admin.DevicePolicyManager
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.GestureDetector
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.OvershootInterpolator
@@ -21,7 +26,7 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.Toast
-import android.window.OnBackInvokedCallback
+import androidx.activity.OnBackPressedCallback
 import com.rama.mako.CsActivity
 import com.rama.mako.R
 import com.rama.mako.managers.AppListManager
@@ -31,6 +36,7 @@ import com.rama.mako.managers.ClockManager
 import com.rama.mako.managers.HomeBackgroundManager
 import com.rama.mako.managers.PrefsManager
 import com.rama.mako.managers.ThemeManager
+import com.rama.mako.receivers.ScreenLockAdminReceiver
 
 class MainActivity : CsActivity() {
 
@@ -52,7 +58,6 @@ class MainActivity : CsActivity() {
     private lateinit var clearBtn: FrameLayout
     private var isSearchBarAlwaysVisible = false
 
-    private var backCallback: OnBackInvokedCallback? = null
     private var isSearchExpanded = false
     private var isProgrammaticSearchUpdate = false
     private val searchDebounceHandler = Handler(Looper.getMainLooper())
@@ -62,6 +67,10 @@ class MainActivity : CsActivity() {
     private var wallpaperReceiverRegistered = false
     private var lastAppliedBackgroundMode: String? = null
     private var lastAppliedWallpaperSignature: Int? = null
+    private var isDoubleTapToSleepEnabled = false
+    private lateinit var doubleTapGestureDetector: GestureDetector
+    private lateinit var screenLockAdminComponent: ComponentName
+    private var lastAppliedTheme: String? = null
 
     companion object {
         private const val WALLPAPER_CHANGED_ACTION = "android.intent.action.WALLPAPER_CHANGED"
@@ -73,7 +82,7 @@ class MainActivity : CsActivity() {
                 applyHomeBackground()
             }
         }
-    }
+        }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         return when (keyCode) {
@@ -94,34 +103,31 @@ class MainActivity : CsActivity() {
 
         rootView = findViewById(R.id.root)
         applyEdgeToEdgePadding(rootView)
+        initDoubleTapToSleep()
         applyCurrentTheme(rootView)
         rootView.isFocusableInTouchMode = false
         rootView.requestFocus()
         val palette = ThemeManager.paletteFor(prefs.getTheme())
 
-        // --- Prefs ---
         homeBackgroundManager = HomeBackgroundManager(this)
         applyHomeBackground(force = true)
 
-        // --- Views ---
         timeText = findViewById(R.id.time)
         dateText = findViewById(R.id.date)
         batteryText = findViewById(R.id.battery)
         listView = findViewById(R.id.app_list)
 
-        // --- Clock ---
-        clockManager = ClockManager(timeText, dateText, this) // now uses PrefsManager internally
+        clockManager = ClockManager(timeText, dateText, this)
         clockManager.start()
         timeText.setOnClickListener { openSystemClock() }
+        dateText.setOnClickListener { openDateApp() }
 
-        // --- Battery ---
         batteryManager = BatteryManager(
             context = this,
             callback = { status -> batteryText.text = status },
         )
         batteryManager.register()
 
-        // --- App List ---
         appsProvider = AppsProvider(this)
         appListManager = AppListManager(
             this,
@@ -143,32 +149,35 @@ class MainActivity : CsActivity() {
         }
 
         initSearchbar()
-        setupBackHandling()
-    }
 
-    // --- OnBackInvokedCallback registor for Android 13+ ---
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (appListManager.handleBackPress()) return
 
-    private fun setupBackHandling() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            backCallback = OnBackInvokedCallback {
-                // If search is always visible, loose focus and collapse keyboard
                 if (isSearchBarAlwaysVisible) {
                     searchField.clearFocus()
-                    val imm =
-                        getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-                    imm.hideSoftInputFromWindow(searchField.windowToken, 0)
-                }
-                // If search is expanded, collapse it; otherwise consume back to prevent launcher restart
-                else if (isSearchExpanded) {
+                } else if (isSearchExpanded) {
                     collapseSearch()
+                } else {
+                    finish()
                 }
-                // Else, do nothing (consume back to keep launcher open)
             }
-            onBackInvokedDispatcher.registerOnBackInvokedCallback(
-                android.window.OnBackInvokedDispatcher.PRIORITY_OVERLAY,
-                backCallback!!
-            )
-        }
+        })
+
+    }
+
+    private fun initDoubleTapToSleep() {
+        screenLockAdminComponent = ComponentName(this, ScreenLockAdminReceiver::class.java)
+        doubleTapGestureDetector = GestureDetector(
+            this,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onDown(e: MotionEvent): Boolean = true
+
+                override fun onDoubleTap(e: MotionEvent): Boolean {
+                    return lockScreenOnDoubleTap()
+                }
+            }
+        )
     }
 
     private fun initSearchbar() {
@@ -176,11 +185,9 @@ class MainActivity : CsActivity() {
         searchIcon = findViewById(R.id.search_icon)
         clearBtn = findViewById(R.id.clear_field)
 
-        // Initially collapsed
         searchField.visibility = View.GONE
         clearBtn.visibility = View.GONE
 
-        // Search icon
         searchIcon.setOnClickListener {
             it.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
 
@@ -191,7 +198,6 @@ class MainActivity : CsActivity() {
             }
         }
 
-        // Text change with debounce
         searchField.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
@@ -199,24 +205,20 @@ class MainActivity : CsActivity() {
 
                 val query = s.toString()
 
-                // Cancel previous debounce
                 searchDebounceRunnable?.let { searchDebounceHandler.removeCallbacks(it) }
 
-                // Schedule new after 300ms
                 searchDebounceRunnable = Runnable {
                     currentSearchQuery = query
                     appListManager.filter(currentSearchQuery)
                 }
                 searchDebounceHandler.postDelayed(searchDebounceRunnable!!, 300)
 
-                // Clear button
                 clearBtn.visibility = if (query.isNotEmpty()) View.VISIBLE else View.GONE
             }
 
             override fun afterTextChanged(s: android.text.Editable?) {}
         })
 
-        // Clear button (resets the list too)
         clearBtn.setOnClickListener {
             currentSearchQuery = ""
             searchDebounceRunnable?.let { searchDebounceHandler.removeCallbacks(it) }
@@ -231,7 +233,6 @@ class MainActivity : CsActivity() {
     private fun expandSearch() {
         isSearchExpanded = true
 
-        // Show field
         searchField.visibility = View.VISIBLE
         if (!isSearchBarAlwaysVisible)
             searchField.requestFocus()
@@ -247,7 +248,6 @@ class MainActivity : CsActivity() {
             start()
         }
 
-        // Show keyboard
         val imm =
             getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
         imm.showSoftInput(searchField, 0)
@@ -256,7 +256,6 @@ class MainActivity : CsActivity() {
     private fun collapseSearch(clearQuery: Boolean = true, hideKeyboard: Boolean = true) {
         isSearchExpanded = false
 
-        // Hide field
         searchField.visibility = View.GONE
         clearBtn.visibility = View.GONE
         searchField.clearFocus()
@@ -279,7 +278,7 @@ class MainActivity : CsActivity() {
 
     override fun onResume() {
         super.onResume()
-        applyHomeBackground()
+        applyHomeBackground(force = true)
         unregisterWallpaperReceiverIfNeeded()
         syncSettings()
         schedulePostResumeRefresh()
@@ -299,38 +298,23 @@ class MainActivity : CsActivity() {
         unregisterWallpaperReceiverIfNeeded()
         clearPendingResumeRefresh()
 
-        // Clean up debounce handler
         searchDebounceRunnable?.let { searchDebounceHandler.removeCallbacks(it) }
-
-        // Unregister back callback for Android 13+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && backCallback != null) {
-            onBackInvokedDispatcher.unregisterOnBackInvokedCallback(backCallback!!)
-        }
 
         batteryManager.unregister()
         clockManager.stop()
     }
 
-    override fun onBackPressed() {
-        // Handle back for below Android 12
-        // If search is always visible, loose focus and collapse keyboard
-        if (isSearchBarAlwaysVisible) {
-            searchField.clearFocus()
-            val imm =
-                getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
-            imm.hideSoftInputFromWindow(searchField.windowToken, 0)
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (isDoubleTapToSleepEnabled) {
+            doubleTapGestureDetector.onTouchEvent(ev)
         }
-        // If search is expanded, collapse it; otherwise consume back to prevent launcher restart
-        else if (isSearchExpanded) {
-            collapseSearch()
-        }
-        // Else, do nothing (consume back to keep launcher open)
+        return super.dispatchTouchEvent(ev)
     }
-
-    // --- Settings sync (row visibility only) ---
+    
     private fun syncSettings() {
         val searchVisible = prefs.isSearchVisible()
 
+        isDoubleTapToSleepEnabled = prefs.isDoubleTapToSleepEnabled()
         isSearchBarAlwaysVisible = prefs.isSearchBarAlwaysVisible()
         timeText.visibility =
             if (prefs.getClockFormat() != PrefsManager.ClockFormat.NONE) View.VISIBLE else View.GONE
@@ -342,6 +326,45 @@ class MainActivity : CsActivity() {
             if (searchVisible) View.VISIBLE else View.GONE
         searchIcon.visibility =
             if (searchVisible && !isSearchBarAlwaysVisible) View.VISIBLE else View.GONE
+    }
+
+    private fun lockScreenOnDoubleTap(): Boolean {
+        if (!isDoubleTapToSleepEnabled) return false
+        if (isSearchExpanded || appListManager.isInMultiSelectMode()) return false
+
+        val policyManager = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        if (!policyManager.isAdminActive(screenLockAdminComponent)) {
+            Toast.makeText(this, getString(R.string.double_tap_sleep_enable_admin_toast), Toast.LENGTH_SHORT)
+                .show()
+            return false
+        }
+
+        return runCatching {
+            policyManager.lockNow()
+            true
+        }.getOrElse {
+            Toast.makeText(this, getString(R.string.double_tap_sleep_failed_toast), Toast.LENGTH_SHORT)
+                .show()
+            false
+        }
+    }
+
+    // --- Open date app ---
+    private fun openDateApp() {
+        val packageName = prefs.getDateApp()
+        if (packageName.isNotEmpty()) {
+            val app = appsProvider.getAll().firstOrNull { it.packageName == packageName }
+            if (app != null) {
+                if (!appsProvider.launch(app)) {
+                    Toast.makeText(
+                        this,
+                        getString(R.string.toast_unable_launch_app),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                return
+            }
+        }
     }
 
     // --- Open system clock safely ---
@@ -360,45 +383,38 @@ class MainActivity : CsActivity() {
                 return
             }
         }
-        // Fallback: launch system clock via standard intent
         val intent = Intent(android.provider.AlarmClock.ACTION_SHOW_ALARMS).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         runCatching { startActivity(intent) }
     }
 
+    // The only place in the app where FLAG_SHOW_WALLPAPER is ever set.
+    // All other activities get bg_1 via CsActivity.applyWindowBackground().
     private fun applyHomeBackground(force: Boolean = false) {
         val mode = prefs.getHomeBackgroundMode()
-        val wallpaperSignature = null
+        val wallpaperSignature = homeBackgroundManager.getWallpaperSignature()
+        val theme = prefs.getTheme()
 
-        if (!force && mode == lastAppliedBackgroundMode && wallpaperSignature == lastAppliedWallpaperSignature) {
-            return
-        }
+        if (!force &&
+            mode == lastAppliedBackgroundMode &&
+            wallpaperSignature == lastAppliedWallpaperSignature &&
+            theme == lastAppliedTheme
+        ) return
 
         if (mode == PrefsManager.BackgroundMode.WALLPAPER) {
-            applyWallpaperModeBackground()
+            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+            window.setBackgroundDrawable(homeBackgroundManager.createWallpaperOverlayDrawable())
+            window.navigationBarColor = Color.TRANSPARENT
+            rootView.setBackgroundColor(Color.TRANSPARENT)
         } else {
-            disableWindowWallpaper(mode)
+            applyWindowBackground()
             homeBackgroundManager.applyTo(rootView, mode)
         }
 
         lastAppliedBackgroundMode = mode
         lastAppliedWallpaperSignature = wallpaperSignature
-    }
-
-    private fun applyWallpaperModeBackground() {
-        enableWindowWallpaper()
-        rootView.setBackgroundColor(Color.TRANSPARENT)
-    }
-
-    private fun enableWindowWallpaper() {
-        window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
-        window.setBackgroundDrawable(homeBackgroundManager.createWallpaperOverlayDrawable())
-    }
-
-    private fun disableWindowWallpaper(mode: String) {
-        window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
-        window.setBackgroundDrawable(homeBackgroundManager.createBackgroundDrawable(mode))
+        lastAppliedTheme = theme
     }
 
     private fun schedulePostResumeRefresh() {

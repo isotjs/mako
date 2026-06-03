@@ -31,5 +31,6 @@
 
     <LinearLayout
         android:id="@+id/section_content"
+        android:orientation="vertical"
         style="@style/VerticalListDivided" />
 </LinearLayout>

@@ -1,7 +1,7 @@
 package com.rama.mako
 
-import android.app.Activity
 import android.content.Context
+import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
@@ -10,13 +10,12 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import com.rama.mako.managers.FontManager
 import com.rama.mako.managers.ThemeManager
+import androidx.activity.ComponentActivity
 import com.rama.mako.utils.dp
 import com.rama.mako.managers.PrefsManager
 import com.rama.mako.utils.LocaleHelper
-import kotlin.text.toInt
-import kotlin.times
 
-abstract class CsActivity : Activity() {
+abstract class CsActivity : ComponentActivity() {
 
     val prefs by lazy { PrefsManager.getInstance(this) }
     private var lastKnownAppLanguage: String? = null
@@ -29,8 +28,6 @@ abstract class CsActivity : Activity() {
         val scale = PrefsManager.getInstance(localeContext).getUiScale()
 
         val context = if (scale != 1f) {
-            // createConfigurationContext derives densityDpi from the *base* context
-            // each time, so there is no compounding across recreate() calls.
             val config = Configuration(localeContext.resources.configuration)
             config.densityDpi = (localeContext.resources.displayMetrics.densityDpi * scale).toInt()
             localeContext.createConfigurationContext(config)
@@ -89,8 +86,11 @@ abstract class CsActivity : Activity() {
             return
         }
 
+        applyRotationLock(prefs.getBoolean(PrefsManager.PrefKeys.SYSTEM_PREVENT_ROTATION, false))
+
         val root = findViewById<View>(android.R.id.content)
         ThemeManager.applyTheme(this, root)
+        applyWindowBackground()
     }
 
     fun refreshFont() {
@@ -104,10 +104,15 @@ abstract class CsActivity : Activity() {
         applyNavBarColor()
     }
 
-    private fun applyNavBarColor() {
+    fun applyWindowBackground() {
+        val palette = ThemeManager.paletteFor(prefs.getTheme(), this)
+        window.clearFlags(WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(palette.bg_1))
+    }
+
+    protected fun applyNavBarColor() {
         val palette = ThemeManager.paletteFor(prefs.getTheme(), this)
         window.navigationBarColor = palette.bg_1
-        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(palette.bg_1))
     }
 
     protected fun updateSystemBars(root: View) {
@@ -129,6 +134,14 @@ abstract class CsActivity : Activity() {
         if (hasFocus) {
             val root = findViewById<View>(android.R.id.content)
             updateSystemBars(root)
+        }
+    }
+
+    fun applyRotationLock(lock: Boolean) {
+        requestedOrientation = if (lock) {
+            ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        } else {
+            ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         }
     }
 

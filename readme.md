@@ -25,6 +25,14 @@ distractions to a minimum by emphasizing clarity and intentional interaction.
 
 ---
 
+## Wallpapers
+
+| Sky | Mountains | Pond |
+| - | - | - |
+| ![Sky](./docs/img/png/wallpaper_1.png) | ![Mountains](./docs/img/png/wallpaper_2.png) | ![Pond](./docs/img/png/wallpaper_3.png) |
+
+---
+
 ## Permissions
 
 Mako requires **only essential permissions**:
