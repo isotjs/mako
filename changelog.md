@@ -1,5 +1,16 @@
 # Changelog
 
+## Backlog
+- Add gesture section
+- Add option for home double tap
+- Add option for home long press (currently shows settings)
+- Move clock tap option to gestures
+- Move date tap option to gestures
+- Add option for clock long press
+- Add option for date long press
+- Add option for sleep among the apps that can be selected for gestures
+- Add option for open settings among the apps that can be selected for gestures
+
 ## 41
 - Screen opacity control
 - Fix navigation bar color + opacity
@@ -10,7 +21,8 @@
 - Add pond wallpaper
 - Add double tap to put phone to sleep
 - Add date tap action
-- Add multiple selection for items when moving to a group
+- Replace context menu with menu bar
+- Add multiple selection option
 
 ## 40
 - Add zoom control
