@@ -2,7 +2,9 @@ package com.rama.mako.activities
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.app.admin.DevicePolicyManager
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ActivityInfo
@@ -35,6 +37,7 @@ import com.rama.mako.managers.HomeBackgroundManager
 import com.rama.mako.managers.DoubleTapLockManager
 import com.rama.mako.managers.PrefsManager
 import com.rama.mako.managers.ThemeManager
+import com.rama.mako.receivers.ScreenLockAdminReceiver
 
 class MainActivity : CsActivity() {
 
@@ -67,7 +70,7 @@ class MainActivity : CsActivity() {
     private var lastAppliedWallpaperSignature: Int? = null
     private var isDoubleTapToSleepEnabled = false
     private lateinit var doubleTapGestureDetector: GestureDetector
-    private lateinit var doubleTapLockManager: DoubleTapLockManager
+    private lateinit var screenLockAdminComponent: ComponentName
     private var lastAppliedTheme: String? = null
 
     companion object {
@@ -165,7 +168,7 @@ class MainActivity : CsActivity() {
     }
 
     private fun initDoubleTapToSleep() {
-        doubleTapLockManager = DoubleTapLockManager(this)
+        screenLockAdminComponent = ComponentName(this, ScreenLockAdminReceiver::class.java)
         doubleTapGestureDetector = GestureDetector(
             this,
             object : GestureDetector.SimpleOnGestureListener() {
@@ -330,23 +333,21 @@ class MainActivity : CsActivity() {
         if (!isDoubleTapToSleepEnabled) return false
         if (isSearchExpanded || appListManager.isInMultiSelectMode()) return false
 
-        if (!doubleTapLockManager.isCurrentMethodAvailable()) {
-            val msg = when (doubleTapLockManager.getMethod()) {
-                DoubleTapLockManager.METHOD_ACCESSIBILITY ->
-                    getString(R.string.double_tap_sleep_failed_toast)
-                else ->
-                    getString(R.string.double_tap_sleep_enable_admin_toast)
-            }
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-            return false
-        }
-
-        if (!doubleTapLockManager.lock()) {
-            Toast.makeText(this, getString(R.string.double_tap_sleep_failed_toast), Toast.LENGTH_SHORT)
+        val policyManager = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        if (!policyManager.isAdminActive(screenLockAdminComponent)) {
+            Toast.makeText(this, getString(R.string.double_tap_sleep_enable_admin_toast), Toast.LENGTH_SHORT)
                 .show()
             return false
         }
-        return true
+
+        return runCatching {
+            policyManager.lockNow()
+            true
+        }.getOrElse {
+            Toast.makeText(this, getString(R.string.double_tap_sleep_failed_toast), Toast.LENGTH_SHORT)
+                .show()
+            false
+        }
     }
 
     // --- Open date app ---
