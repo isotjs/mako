@@ -17,7 +17,7 @@ class SettingsCheckboxController(private val activity: SettingsActivity) {
 
     private lateinit var doubleTapSleepCheckbox: WdCheckbox
     private lateinit var lockMethodContainer: View
-    private lateinit var lockMethodAccessibility: android.widget.RadioButton
+    private lateinit var lockMethodAccessibility: RadioButton
     private var isSyncingDoubleTapSleepCheckbox = false
     private var isSyncingLockMethodGroup = false
 

@@ -341,7 +341,12 @@ class MainActivity : CsActivity() {
             return false
         }
 
-        return doubleTapLockManager.lock()
+        if (!doubleTapLockManager.lock()) {
+            Toast.makeText(this, getString(R.string.double_tap_sleep_failed_toast), Toast.LENGTH_SHORT)
+                .show()
+            return false
+        }
+        return true
     }
 
     // --- Open date app ---
