@@ -1,8 +1,5 @@
 ![Preview](./docs/img/mako_header_1200x630.svg)
-
-<p align="center">
-  <img src="https://rama-io.github.io/img/badge_mako.svg">
-</p>
+![Badge](https://rama-io.github.io/img/badge_mako.svg)
 
 # Mako
 
