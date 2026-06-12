@@ -80,6 +80,11 @@ class SettingsBasicController(private val activity: SettingsActivity) {
                         activity.getString(R.string.toast_reset_done),
                         Toast.LENGTH_SHORT
                     ).show()
+                    activity.startActivity(
+                        Intent(activity, MainActivity::class.java).apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        }
+                    )
                 }
                 .onFailure {
                     Toast.makeText(
