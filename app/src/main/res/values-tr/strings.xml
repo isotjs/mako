@@ -115,6 +115,7 @@
     <string name="checkbox_randomized_keypad">Rastgele tuş takımı</string>
     <string name="checkbox_always_show_search_bar">Her zaman görünür</string>
     <string name="checkbox_prevent_home_screen_rotation">Ekran döndürmeyi kilitle</string>
+    <string name="checkbox_click_on_icons_open_app_settings">İkonuna tıklandığında uygulama ayarlarını aç</string>
 
     <!-- ContextMenu -->
     <string name="ctxmenu_rename_app">Uygulamayı yeniden adlandır...</string>

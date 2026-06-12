@@ -115,6 +115,7 @@
     <string name="checkbox_randomized_keypad">Zufälliges Tastenfeld</string>
     <string name="checkbox_always_show_search_bar">Immer anzeigen</string>
     <string name="checkbox_prevent_home_screen_rotation">Bildschirmrotation sperren</string>
+    <string name="checkbox_click_on_icons_open_app_settings">App-Einstellungen beim Klicken auf Icon öffnen</string>
 
     <!-- ContextMenu -->
     <string name="ctxmenu_rename_app">App umbenennen...</string>
