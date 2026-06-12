@@ -15,6 +15,7 @@
 ## 43
 
 - Fix wallpaper overlay stacking and list ghosting
+- Add proper export and import data
 
 ## 42
 
