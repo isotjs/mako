@@ -187,7 +187,7 @@ class PrefsManager private constructor(context: Context) {
         const val CUSTOM = "custom"
     }
 
-    fun initPrefs() {
+    fun initPrefs(sync: Boolean = false) {
         val ids = prefs.getStringSet(PrefKeys.GROUPS_IDS, null)
 
         if (ids.isNullOrEmpty()) {
@@ -196,7 +196,7 @@ class PrefsManager private constructor(context: Context) {
                 SystemIds.FAVORITES
             )
 
-            prefs.edit()
+            val editor = prefs.edit()
                 .putStringSet(PrefKeys.GROUPS_IDS, defaultIds)
 
                 .putString(PrefKeys.GROUP_LABEL(SystemIds.UNGROUPED), UI.UNGROUPED_LABEL)
@@ -265,13 +265,13 @@ class PrefsManager private constructor(context: Context) {
                 .putBoolean(PrefKeys.SETTINGS_SECTION_SECURITY, true)
                 .putBoolean(PrefKeys.SETTINGS_SECTION_THEMES, true)
 
-                .apply()
+            if (sync) editor.commit() else editor.apply()
         }
 
-        migrateLegacyPrefs()
+        migrateLegacyPrefs(sync)
     }
 
-    private fun migrateLegacyPrefs() {
+    private fun migrateLegacyPrefs(sync: Boolean = false) {
         val editor = prefs.edit()
         var hasChanges = false
 
@@ -294,7 +294,7 @@ class PrefsManager private constructor(context: Context) {
         }
 
         if (hasChanges) {
-            editor.apply()
+            if (sync) editor.commit() else editor.apply()
         }
     }
 
@@ -687,7 +687,7 @@ class PrefsManager private constructor(context: Context) {
     fun clearAllPrefs(): Result<Unit> {
         return try {
             prefs.edit().clear().commit()
-            initPrefs()
+            initPrefs(sync = true)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
