@@ -629,6 +629,44 @@ class PrefsManager private constructor(context: Context) {
         return json
     }
 
+    // Import from SAF (user picked file)
+
+    fun importFromUri(context: Context, uri: Uri): Boolean {
+        return try {
+            val jsonString = context.contentResolver.openInputStream(uri)?.use {
+                it.bufferedReader().readText()
+            } ?: return false
+
+            val json = JSONObject(jsonString)
+
+            clearAllPrefs()
+
+            val editor = prefs.edit()
+            json.keys().forEach { key ->
+                when (val value = json.get(key)) {
+                    is Boolean -> editor.putBoolean(key, value)
+                    is Int -> editor.putInt(key, value)
+                    is Long -> editor.putLong(key, value)
+                    is Float -> editor.putFloat(key, value)
+                    is Double -> editor.putFloat(key, value.toFloat())
+                    is String -> editor.putString(key, value)
+                    is org.json.JSONArray -> {
+                        val set = mutableSetOf<String>()
+                        for (i in 0 until value.length()) {
+                            set.add(value.getString(i))
+                        }
+                        editor.putStringSet(key, set)
+                    }
+                }
+            }
+            editor.commit()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
     // Export to SAF (user picked location)
 
     fun exportToUri(context: Context, uri: Uri): Boolean {
