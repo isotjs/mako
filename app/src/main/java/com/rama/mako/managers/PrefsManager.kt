@@ -37,6 +37,11 @@ class PrefsManager private constructor(context: Context) {
                 INSTANCE ?: PrefsManager(context.applicationContext).also { INSTANCE = it }
             }
         }
+
+        // Keys whose JSON-encoded integers must be re-coerced to Float on import
+        private val FLOAT_PREF_KEYS = setOf(
+            PrefKeys.APP_UI_SCALE
+        )
     }
 
     object UI {
@@ -187,7 +192,7 @@ class PrefsManager private constructor(context: Context) {
         const val CUSTOM = "custom"
     }
 
-    fun initPrefs() {
+    fun initPrefs(sync: Boolean = false) {
         val ids = prefs.getStringSet(PrefKeys.GROUPS_IDS, null)
 
         if (ids.isNullOrEmpty()) {
@@ -196,7 +201,7 @@ class PrefsManager private constructor(context: Context) {
                 SystemIds.FAVORITES
             )
 
-            prefs.edit()
+            val editor = prefs.edit()
                 .putStringSet(PrefKeys.GROUPS_IDS, defaultIds)
 
                 .putString(PrefKeys.GROUP_LABEL(SystemIds.UNGROUPED), UI.UNGROUPED_LABEL)
@@ -265,13 +270,13 @@ class PrefsManager private constructor(context: Context) {
                 .putBoolean(PrefKeys.SETTINGS_SECTION_SECURITY, true)
                 .putBoolean(PrefKeys.SETTINGS_SECTION_THEMES, true)
 
-                .apply()
+            if (sync) editor.commit() else editor.apply()
         }
 
-        migrateLegacyPrefs()
+        migrateLegacyPrefs(sync)
     }
 
-    private fun migrateLegacyPrefs() {
+    private fun migrateLegacyPrefs(sync: Boolean = false) {
         val editor = prefs.edit()
         var hasChanges = false
 
@@ -294,7 +299,7 @@ class PrefsManager private constructor(context: Context) {
         }
 
         if (hasChanges) {
-            editor.apply()
+            if (sync) editor.commit() else editor.apply()
         }
     }
 
@@ -629,6 +634,48 @@ class PrefsManager private constructor(context: Context) {
         return json
     }
 
+    // Import from SAF (user picked file)
+
+    fun importFromUri(context: Context, uri: Uri): Boolean {
+        return try {
+            val jsonString = context.contentResolver.openInputStream(uri)?.use {
+                it.bufferedReader().readText()
+            } ?: return false
+
+            val json = JSONObject(jsonString)
+
+            clearAllPrefs()
+
+            val editor = prefs.edit()
+            json.keys().forEach { key ->
+                when (val value = json.get(key)) {
+                    is Boolean -> editor.putBoolean(key, value)
+                    is Int -> {
+                        if (key in FLOAT_PREF_KEYS) editor.putFloat(key, value.toFloat())
+                        else editor.putInt(key, value)
+                    }
+
+                    is Long -> editor.putLong(key, value)
+                    is Float -> editor.putFloat(key, value)
+                    is Double -> editor.putFloat(key, value.toFloat())
+                    is String -> editor.putString(key, value)
+                    is org.json.JSONArray -> {
+                        val set = mutableSetOf<String>()
+                        for (i in 0 until value.length()) {
+                            set.add(value.getString(i))
+                        }
+                        editor.putStringSet(key, set)
+                    }
+                }
+            }
+            editor.commit()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
     // Export to SAF (user picked location)
 
     fun exportToUri(context: Context, uri: Uri): Boolean {
@@ -649,7 +696,7 @@ class PrefsManager private constructor(context: Context) {
     fun clearAllPrefs(): Result<Unit> {
         return try {
             prefs.edit().clear().commit()
-            initPrefs()
+            initPrefs(sync = true)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
