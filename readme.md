@@ -59,9 +59,19 @@ No network access is required.
 
 ## Installation
 
-- Available on **[F-Droid](https://f-droid.org/app/com.rama.mako)** for easy installation and updates.
-- Download the latest APK from the **[Releases page](https://github.com/rama-io/mako/releases)** or use **[Obtanium](https://github.com/ImranR98/Obtainium)** to get the newest version directly
-  from the github releases.
+<p>
+  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/rama-io/tui">
+    <img src="https://rama-io.github.io/img/obtainium.png" alt="Get tui From Obtainium">
+  </a>
+  &nbsp;
+  <a href="https://f-droid.org/app/com.rama.tui">
+    <img src="https://rama-io.github.io/img/fdroid.png" alt="Get tui From F-Droid">
+  </a>
+  &nbsp;
+  <a href="https://github.com/rama-io/tui/releases/latest">
+    <img src="https://rama-io.github.io/img/github.png" alt="Get tui From GitHub">
+  </a>
+</p>
 
 ## Signing certificate hash
 
