@@ -60,16 +60,16 @@ No network access is required.
 ## Installation
 
 <p>
-  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/rama-io/tui">
-    <img src="https://rama-io.github.io/img/obtainium.png" alt="Get tui From Obtainium">
+  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/rama-io/mako">
+    <img src="https://rama-io.github.io/img/obtainium.png" alt="Get mako From Obtainium">
   </a>
   &nbsp;
-  <a href="https://f-droid.org/app/com.rama.tui">
-    <img src="https://rama-io.github.io/img/fdroid.png" alt="Get tui From F-Droid">
+  <a href="https://f-droid.org/app/com.rama.mako">
+    <img src="https://rama-io.github.io/img/fdroid.png" alt="Get mako From F-Droid">
   </a>
   &nbsp;
-  <a href="https://github.com/rama-io/tui/releases/latest">
-    <img src="https://rama-io.github.io/img/github.png" alt="Get tui From GitHub">
+  <a href="https://github.com/rama-io/mako/releases/latest">
+    <img src="https://rama-io.github.io/img/github.png" alt="Get mako From GitHub">
   </a>
 </p>
 
