@@ -14,7 +14,6 @@ import com.rama.mako.activities.settings.SettingsPinController
 import com.rama.mako.activities.settings.SettingsGroupsController
 import com.rama.mako.activities.settings.SettingsIconsController
 import com.rama.mako.activities.settings.SettingsLanguageController
-import com.rama.mako.activities.settings.SettingsExtController
 import com.rama.mako.managers.AppsProvider
 import com.rama.mako.managers.GroupsManager
 import com.rama.mako.managers.HomeBackgroundManager
@@ -65,9 +64,6 @@ class SettingsActivity : CsActivity() {
         checkboxController = SettingsCheckboxController(this).also { it.setup() }
         SettingsGroupsController(this).setup()
         SettingsPinController(this).setup()
-
-        // ext flavor
-        SettingsExtController(this).setup()
     }
 
     override fun onResume() {
@@ -79,7 +75,7 @@ class SettingsActivity : CsActivity() {
         if (isUnlocked || isLockScreenShowing) return
 
         val lockEnabled = prefs.getBoolean(
-            PrefsManager.PrefKeys.SECURITY_KEYPAD_VISIBLE,
+            PrefsManager.FileKeys.SECURITY_KEYPAD_VISIBLE,
             false
         )
         val hasPin = prefs.getPin().isNotEmpty()
@@ -92,7 +88,7 @@ class SettingsActivity : CsActivity() {
             )
         }
     }
-    
+
     fun applySettingsBackground(force: Boolean = false) {
         applyWindowBackground()
         homeBackgroundManager.applyToSettings(settingsRootView, PrefsManager.BackgroundMode.DEFAULT)

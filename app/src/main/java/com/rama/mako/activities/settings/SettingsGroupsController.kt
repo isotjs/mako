@@ -7,9 +7,10 @@ import android.view.View.generateViewId
 import android.view.ViewGroup
 import android.widget.*
 import com.rama.mako.R
+import com.rama.bohio.R as BohioR
 import com.rama.mako.activities.SettingsActivity
-import com.rama.mako.managers.ThemeManager
-import com.rama.mako.utils.SettingsUiUtils
+import com.rama.bohio.managers.ThemeManager
+import com.rama.bohio.util.UiActions
 
 class SettingsGroupsController(private val activity: SettingsActivity) {
 
@@ -29,7 +30,7 @@ class SettingsGroupsController(private val activity: SettingsActivity) {
 
         render()
 
-        SettingsUiUtils.setClickWithHaptics(activity.findViewById(R.id.add_group)) {
+        UiActions.setClickWithHaptics(activity.findViewById(R.id.add_group)) {
             groupsManager.createGroup(activity.getString(R.string.new_group_header))
             render()
         }
@@ -54,14 +55,14 @@ class SettingsGroupsController(private val activity: SettingsActivity) {
 
         fun updateIcon() {
             toggleIcon.setImageResource(
-                if (prefs.isGroupVisible(groupId)) R.drawable.icon_eye
-                else R.drawable.icon_eye_cross
+                if (prefs.isGroupVisible(groupId)) BohioR.drawable.px_eye
+                else BohioR.drawable.px_eye_cross
             )
         }
 
         updateIcon()
 
-        SettingsUiUtils.setClickWithHaptics(toggle) {
+        UiActions.setClickWithHaptics(toggle) {
             val newValue = !prefs.isGroupVisible(groupId)
             prefs.setGroupVisible(groupId, newValue)
             updateIcon()
@@ -80,7 +81,7 @@ class SettingsGroupsController(private val activity: SettingsActivity) {
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        SettingsUiUtils.setClickWithHaptics(saveButton) {
+        UiActions.setClickWithHaptics(saveButton) {
             val newLabel = name.text.toString().trim()
             if (newLabel.isNotEmpty()) {
                 val id = name.tag as String
@@ -99,7 +100,7 @@ class SettingsGroupsController(private val activity: SettingsActivity) {
             saveButton.visibility = View.GONE
         }
 
-        SettingsUiUtils.setClickWithHaptics(delete) {
+        UiActions.setClickWithHaptics(delete) {
             val dialogView = activity.layoutInflater.inflate(R.layout.dialog_groups_delete, null)
 
             val dialog = android.app.Dialog(activity).apply {
@@ -136,7 +137,7 @@ class SettingsGroupsController(private val activity: SettingsActivity) {
                 selectedGroupId = radioIdToGroupId[checkedId]
             }
 
-            SettingsUiUtils.setClickWithHaptics(yes) {
+            UiActions.setClickWithHaptics(yes) {
                 if (selectedGroupId == null) {
                     Toast.makeText(
                         activity,
@@ -150,7 +151,7 @@ class SettingsGroupsController(private val activity: SettingsActivity) {
                 }
             }
 
-            SettingsUiUtils.setClickWithHaptics(no) { dialog.dismiss() }
+            UiActions.setClickWithHaptics(no) { dialog.dismiss() }
 
             ThemeManager.applyTheme(activity, dialogView)
             dialog.show()
@@ -160,12 +161,12 @@ class SettingsGroupsController(private val activity: SettingsActivity) {
             )
         }
 
-        SettingsUiUtils.setClickWithHaptics(ascend) {
+        UiActions.setClickWithHaptics(ascend) {
             groupsManager.moveGroup(groupId, -1)
             (container.parent as View).post { setup() }
         }
 
-        SettingsUiUtils.setClickWithHaptics(descend) {
+        UiActions.setClickWithHaptics(descend) {
             groupsManager.moveGroup(groupId, +1)
             (container.parent as View).post { setup() }
         }

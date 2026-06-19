@@ -33,7 +33,6 @@
                         android:background="@android:color/transparent"
                         android:layout_width="wrap_content"
                         android:focusable="false"
-                        android:textColor="@color/h1"
                         style="@style/H1" />
 
                     <LinearLayout
@@ -46,14 +45,14 @@
                             android:layout_width="16sp"
                             android:layout_height="16sp"
                             android:tint="@color/icon"
-                            android:src="@drawable/icon_calendar_today" />
+                            android:src="@drawable/px_calendar_today" />
 
                         <TextView
                             android:id="@+id/date"
                             android:textSize="16sp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="?attr/foregroundColor" />
+                            android:textColor="@color/foreground" />
                     </LinearLayout>
 
                     <LinearLayout
@@ -64,14 +63,14 @@
                             android:layout_width="16sp"
                             android:layout_height="16sp"
                             android:tint="@color/icon"
-                            android:src="@drawable/icon_battery_full_alt" />
+                            android:src="@drawable/px_battery_full_alt" />
 
                         <TextView
                             android:id="@+id/battery"
                             android:textSize="16sp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="?attr/foregroundColor" />
+                            android:textColor="@color/foreground" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -82,8 +81,7 @@
                     android:padding="12sp">
 
                     <ImageView
-                        android:layout_gravity="center"
-                        android:src="@drawable/icon_search"
+                        android:src="@drawable/px_search"
                         android:contentDescription="@string/altdescr_search_icon"
                         style="@style/Icon24" />
                 </FrameLayout>
@@ -127,7 +125,7 @@
             android:visibility="gone">
 
             <ImageView
-                android:src="@drawable/icon_close"
+                android:src="@drawable/px_times"
                 android:contentDescription="@string/altdescr_clear_search"
                 style="@style/Icon24" />
         </FrameLayout>
@@ -146,7 +144,7 @@
             android:padding="12sp">
 
             <ImageView
-                android:src="@drawable/icon_arrow_left_solid"
+                android:src="@drawable/px_arrow_left"
                 android:contentDescription="@string/btn_cancel"
                 style="@style/Icon24" />
         </FrameLayout>
@@ -166,7 +164,7 @@
             android:padding="12sp">
 
             <ImageView
-                android:src="@drawable/icon_edit_solid"
+                android:src="@drawable/px_edit"
                 android:contentDescription="@string/ctxmenu_rename_app"
                 style="@style/Icon24" />
         </FrameLayout>
@@ -178,7 +176,7 @@
             android:padding="12sp">
 
             <ImageView
-                android:src="@drawable/icon_folder_enter_solid"
+                android:src="@drawable/px_folder_enter"
                 android:contentDescription="@string/ctxmenu_move_to_group"
                 style="@style/Icon24" />
         </FrameLayout>
@@ -190,7 +188,7 @@
             android:padding="12sp">
 
             <ImageView
-                android:src="@drawable/icon_cog_solid"
+                android:src="@drawable/px_cog"
                 android:contentDescription="@string/ctxmenu_open_settings"
                 style="@style/Icon24" />
         </FrameLayout>
