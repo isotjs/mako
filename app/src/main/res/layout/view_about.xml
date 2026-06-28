@@ -27,20 +27,11 @@
 
             <TextView
                 android:id="@+id/name_version"
-                android:textSize="22sp"
-                android:layout_gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/foreground" />
+                style="@style/H3_Center" />
 
             <TextView
                 android:text="@string/app_desc"
-                android:textSize="16sp"
-                android:layout_gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:textColor="@color/foreground" />
+                style="@style/Text_Center" />
 
             <TextView
                 android:text="@string/h3_app"
@@ -123,6 +114,20 @@
                 android:layout_height="wrap_content"
                 android:icon="@drawable/px_github"
                 android:text="@string/contributor_etwasmitbaum_url" />
+
+            <View style="@style/Separator" />
+
+            <com.rama.bohio.widgets.WdLabel
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:icon="@drawable/px_user"
+                android:text="@string/contributor_joerikaiser" />
+
+            <com.rama.bohio.widgets.WdLabel
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:icon="@drawable/px_github"
+                android:text="@string/contributor_joerikaiser_url" />
 
             <TextView
                 android:text="@string/h3_icons"

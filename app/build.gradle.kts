@@ -15,7 +15,7 @@ android {
         applicationId = "com.rama.mako"
         minSdk = 21
         targetSdk = 36
-        versionCode = 43
+        versionCode = 44
         versionName = "$currentYear.$versionCode"
     }
 
@@ -32,9 +32,11 @@ android {
         create("beta") {
             applicationIdSuffix = ".beta"
             versionNameSuffix = "-beta"
-
             isMinifyEnabled = true
-
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             signingConfig = signingConfigs.getByName("debug")
         }
         debug {

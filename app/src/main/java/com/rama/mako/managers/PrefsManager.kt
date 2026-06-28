@@ -6,6 +6,7 @@ import android.os.UserHandle
 import com.rama.bohio.util.IdUtils
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.rama.bohio.objects.PrefKeys
 import com.rama.bohio.objects.PrefTheme
 import com.rama.bohio.managers.PrefsManager as BohioPrefsManager
 
@@ -31,6 +32,7 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
         const val GROUPS_IDS = "groups:ids"
         const val GROUPS_HEADERS = "groups:headers"
         const val GROUPS_COLLAPSIBLE = "groups:collapsible"
+        const val GROUPS_COLLAPSE_ON_HOME_FOCUS = "groups:collapse_on_home_focus"
         const val DATE_VISIBLE = "date:visible"
         const val DATE_YEAR_DAY = "date:year_day"
         const val BATTERY_VISIBLE = "battery:visible"
@@ -45,18 +47,6 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
         const val SECURITY_KEYPAD_VISIBLE = "security:keypad:visible"
         const val SECURITY_KEYPAD_RANDOMIZED = "security:keypad:randomized"
         const val SECURITY_PIN = "security:pin"
-
-        const val SETTINGS_SECTION_CLOCK = "settings:section:clock"
-        const val SETTINGS_SECTION_BACKGROUND = "settings:section:background"
-        const val SETTINGS_SECTION_BATTERY = "settings:section:battery"
-        const val SETTINGS_SECTION_TEMPERATURE = "settings:section:temperature"
-        const val SETTINGS_SECTION_DATE = "settings:section:date"
-        const val SETTINGS_SECTION_ICONS = "settings:section:icons"
-        const val SETTINGS_SECTION_GROUPS = "settings:section:groups"
-        const val SETTINGS_SECTION_SEARCH = "settings:section:search"
-        const val SETTINGS_SECTION_DATA = "settings:section:data"
-        const val SETTINGS_SECTION_APPS = "settings:section:apps"
-        const val SETTINGS_SECTION_SECURITY = "settings:section:apps"
 
         fun appKey(pkg: String, userHandle: UserHandle): String {
             val userId = userHandle.hashCode()
@@ -157,21 +147,21 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
 
         editor.putBoolean(FileKeys.GROUPS_HEADERS, true)
         editor.putBoolean(FileKeys.GROUPS_COLLAPSIBLE, true)
-
-        editor.putBoolean(FileKeys.SECURITY_KEYPAD_VISIBLE, false)
+        editor.putBoolean(FileKeys.GROUPS_COLLAPSE_ON_HOME_FOCUS, false)
         editor.putBoolean(FileKeys.SECURITY_KEYPAD_RANDOMIZED, true)
+        editor.putBoolean(FileKeys.SECURITY_KEYPAD_VISIBLE, false)
 
-        editor.putBoolean(FileKeys.SETTINGS_SECTION_CLOCK, true)
-        editor.putBoolean(FileKeys.SETTINGS_SECTION_TEMPERATURE, true)
-        editor.putBoolean(FileKeys.SETTINGS_SECTION_BACKGROUND, true)
-        editor.putBoolean(FileKeys.SETTINGS_SECTION_DATE, true)
-        editor.putBoolean(FileKeys.SETTINGS_SECTION_BATTERY, true)
-        editor.putBoolean(FileKeys.SETTINGS_SECTION_ICONS, true)
-        editor.putBoolean(FileKeys.SETTINGS_SECTION_GROUPS, true)
-        editor.putBoolean(FileKeys.SETTINGS_SECTION_SEARCH, true)
-        editor.putBoolean(FileKeys.SETTINGS_SECTION_DATA, true)
-        editor.putBoolean(FileKeys.SETTINGS_SECTION_APPS, true)
-        editor.putBoolean(FileKeys.SETTINGS_SECTION_SECURITY, true)
+        editor.putBoolean(PrefKeys.SETTINGS_SECTION_CLOCK, true)
+        editor.putBoolean(PrefKeys.SETTINGS_SECTION_TEMPERATURE, true)
+        editor.putBoolean(PrefKeys.SETTINGS_SECTION_BACKGROUND, true)
+        editor.putBoolean(PrefKeys.SETTINGS_SECTION_DATE, true)
+        editor.putBoolean(PrefKeys.SETTINGS_SECTION_BATTERY, true)
+        editor.putBoolean(PrefKeys.SETTINGS_SECTION_ICONS, true)
+        editor.putBoolean(PrefKeys.SETTINGS_SECTION_GROUPS, true)
+        editor.putBoolean(PrefKeys.SETTINGS_SECTION_SEARCH, true)
+        editor.putBoolean(PrefKeys.SETTINGS_SECTION_DATA, true)
+        editor.putBoolean(PrefKeys.SETTINGS_SECTION_APPS, true)
+        editor.putBoolean(PrefKeys.SETTINGS_SECTION_SECURITY, true)
 
         fun migrateLegacyPrefs(sync: Boolean = false) {
             val editor = prefs.edit()
@@ -268,6 +258,12 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
     fun setGroupExpanded(id: String, value: Boolean) =
         prefs.edit().putBoolean(FileKeys.GROUP_EXPANDED(id), value).apply()
 
+    fun setGroupsExpanded(ids: Set<String>, expanded: Boolean) {
+        val editor = prefs.edit()
+        ids.forEach { editor.putBoolean(FileKeys.GROUP_EXPANDED(it), expanded) }
+        editor.apply()
+    }
+
     fun hasGroupOrder(id: String): Boolean =
         prefs.contains(FileKeys.GROUP_ORDER(id))
 
@@ -323,6 +319,9 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
 
     fun hasCollapsibleGroups(): Boolean =
         prefs.getBoolean(FileKeys.GROUPS_COLLAPSIBLE, false)
+
+    fun shouldCollapseGroupsOnHomeFocus(): Boolean =
+        prefs.getBoolean(FileKeys.GROUPS_COLLAPSE_ON_HOME_FOCUS, false)
 
     fun isDoubleTapToSleepEnabled(): Boolean =
         prefs.getBoolean(FileKeys.HOME_DOUBLE_TAP_SLEEP, false)

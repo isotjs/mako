@@ -1,16 +1,14 @@
 # Changelog
 
-## Backlog
+## 44
 
-- Add gesture section
-- Add option for home double tap
-- Add option for home long press (currently shows settings)
-- Move clock tap option to gestures
-- Move date tap option to gestures
-- Add option for clock long press
-- Add option for date long press
-- Add option for sleep among the apps that can be selected for gestures
-- Add option for open settings among the apps that can be selected for gestures
+- Fix color picker
+- Fix choose custom font button visibility
+- Fix expanded sections on settings not keeping state
+- Auto hide groups
+- Add Mono Dark theme
+- Add Mono Light theme
+- Migrating common assets to bohio
 
 ## 43
 
