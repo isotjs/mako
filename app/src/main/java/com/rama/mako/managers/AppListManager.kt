@@ -405,11 +405,17 @@ class AppListManager(
         adapter.notifyDataSetChanged()
     }
 
-    private fun openAppSettings(pkg: String) {
+    private fun openAppSettings(app: AppsProvider.AppEntry) {
+        // Apps living in another profile (e.g. the private space) must be opened
+        // via LauncherApps with that profile's UserHandle, otherwise the system
+        // resolves App Info (and therefore Uninstall) against the wrong user and
+        // the private space app can't be found/uninstalled.
+        if (appsProvider.openAppDetails(app)) return
+
         context.startActivity(
             Intent(
                 Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.fromParts("package", pkg, null)
+                Uri.fromParts("package", app.packageName, null)
             )
                 .apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
         )
@@ -427,7 +433,7 @@ class AppListManager(
         }
 
         if (prefs.hasIconsOpenSettings()) {
-            openAppSettings(app.packageName)
+            openAppSettings(app)
             return
         }
 
@@ -576,7 +582,7 @@ class AppListManager(
         appSettingsButton?.setOnClickListener {
             getSingleSelectedApp()?.let { app ->
                 exitMultiSelectMode()
-                openAppSettings(app.packageName)
+                openAppSettings(app)
             }
         }
     }
@@ -693,7 +699,7 @@ class AppListManager(
 
     private fun setupAdapter() {
         adapter = object : ArrayAdapter<ListItem>(context, 0, items) {
-            override fun getViewTypeCount() = 2
+            override fun getViewTypeCount() = 3
             override fun getItemViewType(position: Int) = when (getItem(position)) {
                 is ListItem.Header -> 0
                 is ListItem.App -> 1
@@ -834,10 +840,6 @@ class AppListManager(
 
         listView.adapter = adapter
         listView.setCacheColorHint(android.graphics.Color.TRANSPARENT)
-
-        // When focus enters the list from outside (e.g. D-pad down from clock),
-        // always land on the first item. focusedChild is null when focus arrives
-        // from an external view, so this won't interfere with navigating within the list.
         listView.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus && listView.focusedChild == null) {
                 listView.setSelection(0)

@@ -2,6 +2,7 @@ package com.rama.mako.managers
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.UserHandle
 import com.rama.bohio.util.IdUtils
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -33,7 +34,10 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
         const val GROUPS_HEADERS = "groups:headers"
         const val GROUPS_COLLAPSIBLE = "groups:collapsible"
         const val GROUPS_COLLAPSE_ON_HOME_FOCUS = "groups:collapse_on_home_focus"
+
+        @Deprecated("Migrated into DATE_FORMAT (see MIGRATION_DATE_FORMAT_RADIO)")
         const val DATE_VISIBLE = "date:visible"
+        const val DATE_FORMAT = "date:format"
         const val DATE_YEAR_DAY = "date:year_day"
         const val BATTERY_VISIBLE = "battery:visible"
         const val BATTERY_TEMPERATURE = "battery:temperature"
@@ -43,6 +47,7 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
         const val CLOCK_APP = "clock:app"
         const val DATE_APP = "date:app"
         const val MIGRATION_ICON_SOURCE_RADIO = "migration:icon_source_radio"
+        const val MIGRATION_DATE_FORMAT_RADIO = "migration:date_format_radio"
 
         const val SECURITY_KEYPAD_VISIBLE = "security:keypad:visible"
         const val SECURITY_KEYPAD_RANDOMIZED = "security:keypad:randomized"
@@ -81,6 +86,14 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
         const val DEFAULT = "default"
         const val HOUR_12 = "12-hour"
         const val HOUR_24 = "24-hour"
+    }
+
+    object DateFormat {
+        const val NONE = "none"
+        const val DEFAULT = "default"
+        const val YMD = "YYYYMMDD"
+        const val MDY = "MMDDYYYY"
+        const val DMY = "DDMMYYYY"
     }
 
     object IconSource {
@@ -122,7 +135,6 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
 
         editor.putString(FileKeys.CLOCK_FORMAT, ClockFormat.HOUR_24)
         editor.putString(FileKeys.CLOCK_APP, "")
-        editor.putString(FileKeys.DATE_APP, "")
 
         editor.putBoolean(FileKeys.APPS_SEARCH, false)
         editor.putBoolean(FileKeys.APPS_PROFILE_INDICATOR, true)
@@ -134,7 +146,7 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
 
         editor.putString(FileKeys.HOME_BACKGROUND_MODE, BackgroundMode.DEFAULT)
         editor.putBoolean(FileKeys.HOME_DOUBLE_TAP_SLEEP, false)
-        editor.putString(FileKeys.HOME_DOUBLE_TAP_LOCK_METHOD, "device_admin")
+        editor.putString(FileKeys.HOME_DOUBLE_TAP_LOCK_METHOD, defaultDoubleTapLockMethod)
         editor.putInt(FileKeys.HOME_BACKGROUND_MODE_SCREEN_OPACITY_STRENGTH, 9)
 
         editor.putBoolean(FileKeys.BATTERY_VISIBLE, true)
@@ -142,8 +154,9 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
         editor.putString(FileKeys.TEMPERATURE_FORMAT, TemperatureFormat.DEFAULT)
         editor.putBoolean(FileKeys.BATTERY_CHARGE_STATUS, false)
 
-        editor.putBoolean(FileKeys.DATE_VISIBLE, true)
+        editor.putString(FileKeys.DATE_FORMAT, DateFormat.YMD)
         editor.putBoolean(FileKeys.DATE_YEAR_DAY, true)
+        editor.putString(FileKeys.DATE_APP, "")
 
         editor.putBoolean(FileKeys.GROUPS_HEADERS, true)
         editor.putBoolean(FileKeys.GROUPS_COLLAPSIBLE, true)
@@ -185,6 +198,20 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
                 hasChanges = true
             }
 
+            if (!prefs.getBoolean(FileKeys.MIGRATION_DATE_FORMAT_RADIO, false)) {
+                if (prefs.contains(FileKeys.DATE_VISIBLE)) {
+                    val wasVisible = prefs.getBoolean(FileKeys.DATE_VISIBLE, true)
+
+                    if (!wasVisible) {
+                        editor.putString(FileKeys.DATE_FORMAT, DateFormat.NONE)
+                    }
+                    editor.remove(FileKeys.DATE_VISIBLE)
+                }
+
+                editor.putBoolean(FileKeys.MIGRATION_DATE_FORMAT_RADIO, true)
+                hasChanges = true
+            }
+
             if (hasChanges) {
                 if (sync) editor.commit() else editor.apply()
             }
@@ -205,6 +232,8 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
     }
+
+    fun getAllKeys(): Set<String> = prefs.all.keys
 
     fun addGroupId(id: String) {
         val updated = getGroupIds().toMutableSet()
@@ -329,8 +358,24 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
     fun setDoubleTapToSleepEnabled(enabled: Boolean) =
         prefs.edit().putBoolean(FileKeys.HOME_DOUBLE_TAP_SLEEP, enabled).apply()
 
-    fun getDoubleTapLockMethod(): String =
-        prefs.getString(FileKeys.HOME_DOUBLE_TAP_LOCK_METHOD, "device_admin") ?: "device_admin"
+    fun getDoubleTapLockMethod(): String {
+        val stored = prefs.getString(FileKeys.HOME_DOUBLE_TAP_LOCK_METHOD, null)
+        return when {
+            stored == null -> defaultDoubleTapLockMethod
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.P &&
+                    stored == DoubleTapLockManager.METHOD_DEVICE_ADMIN ->
+                DoubleTapLockManager.METHOD_ACCESSIBILITY
+
+            else -> stored
+        }
+    }
+
+    private val defaultDoubleTapLockMethod: String
+        get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            DoubleTapLockManager.METHOD_ACCESSIBILITY
+        } else {
+            DoubleTapLockManager.METHOD_DEVICE_ADMIN
+        }
 
     fun setDoubleTapLockMethod(method: String) =
         prefs.edit().putString(FileKeys.HOME_DOUBLE_TAP_LOCK_METHOD, method).apply()
@@ -347,6 +392,12 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
     fun setClockApp(appId: String) =
         prefs.edit().putString(FileKeys.CLOCK_APP, appId).apply()
 
+    fun getDateFormat(): String =
+        prefs.getString(FileKeys.DATE_FORMAT, "") ?: ""
+
+    fun setDateFormat(format: String) =
+        prefs.edit().putString(FileKeys.DATE_FORMAT, format).apply()
+
     fun getDateApp(): String =
         prefs.getString(FileKeys.DATE_APP, "") ?: ""
 
@@ -356,7 +407,7 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
     // SETTINGS - DATE
 
     fun isDateVisible(): Boolean =
-        prefs.getBoolean(FileKeys.DATE_VISIBLE, false)
+        getDateFormat() != DateFormat.NONE
 
     fun isYearDayVisible(): Boolean =
         prefs.getBoolean(FileKeys.DATE_YEAR_DAY, false)

@@ -23,7 +23,7 @@ class IconManager(
 ) {
 
     companion object {
-        private const val MONOCHROME_SCALE = 1.3f
+        private const val MONOCHROME_SCALE = 1.5f
     }
 
     data class IconPackEntry(
@@ -108,7 +108,6 @@ class IconManager(
         if (packageName.isBlank()) return null
 
         val drawableName = resolvePackDrawableName(packageName, app.activityInfo.componentName)
-            ?: return null
 
         return runCatching {
             val resources = packageManager.getResourcesForApplication(packageName)
