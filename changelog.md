@@ -1,5 +1,11 @@
 # Changelog
 
+## 46
+
+- Fix settings section state
+- API support increase to 37 / Android 17
+- Adding rest of contributors
+
 ## 45
 
 - Replace date visibility for date format
