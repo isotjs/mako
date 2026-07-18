@@ -1,4 +1,5 @@
 import java.time.LocalDate
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
@@ -14,7 +15,7 @@ android {
         applicationId = "com.rama.mako"
         minSdk = 21
         targetSdk = 37
-        versionCode = 46
+        versionCode = 47
         versionName = "$currentYear.$versionCode"
     }
 
@@ -28,7 +29,6 @@ android {
             )
             signingConfig = signingConfigs.getByName("debug")
         }
-
         create("beta") {
             applicationIdSuffix = ".beta"
             versionNameSuffix = "-beta"
@@ -39,7 +39,6 @@ android {
             )
             signingConfig = signingConfigs.getByName("debug")
         }
-
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-dev"
@@ -58,7 +57,9 @@ android {
     }
 
     kotlin {
-        jvmToolchain(17)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
     }
 
     androidResources {
@@ -70,9 +71,15 @@ android {
             excludes += "META-INF/*.version"
             excludes += "META-INF/com/android/build/gradle/app-metadata.properties"
         }
-
         jniLibs {
             useLegacyPackaging = true
+        }
+    }
+
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
         }
     }
 }
@@ -94,4 +101,13 @@ dependencies {
     implementation("androidx.activity:activity-ktx:1.9.3")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation(project(":bohio"))
+
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.mockk)
+    testImplementation(libs.truth)
+    testImplementation(libs.androidx.test.core)
+
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 }

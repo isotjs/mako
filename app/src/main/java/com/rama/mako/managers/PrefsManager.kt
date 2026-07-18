@@ -24,6 +24,7 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
         const val APPS_ICON_SOURCE = "apps:icon_source"
         const val APPS_ICON_PACK_PACKAGE = "apps:icon_pack_package"
         const val APPS_ICONS_OPEN_SETTINGS = "apps:icons:open_settings"
+        const val APPS_MULTI_COLUMN = "apps:multi_column"
 
         const val HOME_BACKGROUND_MODE = "home:background_mode"
         const val HOME_DOUBLE_TAP_SLEEP = "home:double_tap_sleep"
@@ -39,6 +40,7 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
         const val DATE_VISIBLE = "date:visible"
         const val DATE_FORMAT = "date:format"
         const val DATE_YEAR_DAY = "date:year_day"
+        const val DATE_YEAR_WEEK = "date:year_week"
         const val BATTERY_VISIBLE = "battery:visible"
         const val BATTERY_TEMPERATURE = "battery:temperature"
         const val TEMPERATURE_FORMAT = "temperature:format"
@@ -143,6 +145,7 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
         editor.putString(FileKeys.APPS_ICON_SOURCE, IconSource.NONE)
         editor.putString(FileKeys.APPS_ICON_PACK_PACKAGE, "")
         editor.putBoolean(FileKeys.APPS_ICONS_OPEN_SETTINGS, true)
+        editor.putBoolean(FileKeys.APPS_MULTI_COLUMN, false)
 
         editor.putString(FileKeys.HOME_BACKGROUND_MODE, BackgroundMode.DEFAULT)
         editor.putBoolean(FileKeys.HOME_DOUBLE_TAP_SLEEP, false)
@@ -156,6 +159,7 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
 
         editor.putString(FileKeys.DATE_FORMAT, DateFormat.YMD)
         editor.putBoolean(FileKeys.DATE_YEAR_DAY, true)
+        editor.putBoolean(FileKeys.DATE_YEAR_WEEK, true)
         editor.putString(FileKeys.DATE_APP, "")
 
         editor.putBoolean(FileKeys.GROUPS_HEADERS, true)
@@ -220,7 +224,7 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
         migrateLegacyPrefs(true)
     }
 
-    private val encryptedPrefs: SharedPreferences = run {
+    private val encryptedPrefs: SharedPreferences by lazy {
         val masterKey = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
             .build()
@@ -378,6 +382,12 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
     fun hasIconsOpenSettings(): Boolean =
         prefs.getBoolean(FileKeys.APPS_ICONS_OPEN_SETTINGS, true)
 
+    fun isMultiColumnEnabled(): Boolean =
+        prefs.getBoolean(FileKeys.APPS_MULTI_COLUMN, false)
+
+    fun setMultiColumnEnabled(enabled: Boolean) =
+        prefs.edit().putBoolean(FileKeys.APPS_MULTI_COLUMN, enabled).apply()
+
     fun getIconSource(): String {
         return when (prefs.getString(FileKeys.APPS_ICON_SOURCE, IconSource.NONE)) {
             IconSource.NONE -> IconSource.NONE
@@ -472,6 +482,9 @@ class PrefsManager private constructor(context: Context) : BohioPrefsManager(con
 
     fun isYearDayVisible(): Boolean =
         prefs.getBoolean(FileKeys.DATE_YEAR_DAY, false)
+
+    fun isYearWeekVisible(): Boolean =
+        prefs.getBoolean(FileKeys.DATE_YEAR_WEEK, false)
 
     fun isBatteryVisible(): Boolean =
         prefs.getBoolean(FileKeys.BATTERY_VISIBLE, false)

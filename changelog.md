@@ -1,5 +1,11 @@
 # Changelog
 
+## 47
+
+- Add week number
+- Add tests
+- Add multi-column layout
+
 ## 46
 
 - Fix settings section state
