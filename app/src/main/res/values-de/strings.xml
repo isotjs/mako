@@ -12,6 +12,7 @@
     <string name="app_desc">Ein leichtgewichtiger, ablenkungsfreier Android-Launcher mit einem Fokus auf Privatssphäre und lokaler Nutzung, optimiert auf Fokus und Einfachheit.</string>
     <string name="btn_about_mako">Über Mako</string>
     <string name="btn_add_group">+ Neue Gruppe hinzufügen</string>
+    <string name="btn_add_shortcut">Hinzufügen</string>
     <string name="btn_change_wallpaper">Betriebssystemhintergrundbild ändern</string>
     <string name="btn_clear_data">Daten löschen</string>
     <string name="btn_delete_group">Gruppe entfernen</string>
@@ -21,6 +22,7 @@
     <string name="btn_import_data">Daten importieren</string>
     <string name="btn_lock">Sperren</string>
     <string name="btn_refresh_launcher">Launcher neu laden</string>
+    <string name="btn_remove_shortcut">Entfernen</string>
     <string name="btn_select_icon_pack">Icon-Paket auswählen</string>
     <string name="btn_set_clock_app">Aktion beim Tippen auf die Uhr ändern</string>
     <string name="btn_set_date_app">Aktion beim Tippen auf das Datum ändern</string>
@@ -44,11 +46,12 @@
     <string name="checkbox_show_search">Suchleiste anzeigen</string>
     <string name="checkbox_show_ungrouped_apps">Zeige nicht gruppierte Apps an</string>
     <string name="checkbox_show_year_day">Tag des Jahres anzeigen</string>
-    <string name="checkbox_show_year_week"></string>
     <string name="ctxmenu_move_to_group">Gruppe ändern…</string>
     <string name="ctxmenu_open_settings">App-Einstellungen…</string>
     <string name="ctxmenu_rename_app">App umbenennen…</string>
     <string name="device_admin_label">Mako Bildschirm sperren</string>
+    <string name="dialog_save_pin_title">Diese PIN speichern?</string>
+    <string name="dialog_save_pin_warning">Merke dir diese PIN. Wenn du sie vergisst, musst du möglicherweise die App-Daten von Mako löschen, um wieder auf die Einstellungen zugreifen zu können.</string>
     <string name="disclaimer_delete_group">Die Apps werden in die folgende Gruppe verschoben.</string>
     <string name="disclaimer_pick_clock_app">Die ausgewählte App wird als Standard-Uhr-Aktion festgelegt. Beim Antippen der Uhr auf dem Startbildschirm wird diese App gestartet.</string>
     <string name="disclaimer_pick_date_app">Die ausgewählte App wird als Standard-Datumsaktion festgelegt. Beim Antippen des Datums auf dem Startbildschirm wird diese App gestartet.</string>
@@ -57,8 +60,10 @@
     <string name="easter_eggs_unlock">Kannst du bitte aufhören damit zu spielen xD</string>
     <string name="filepicker_icon_pack_not_selected">Kein Icon-Paket ausgewählt</string>
     <string name="filepicker_selected_icon_pack">Ausgewähltes Paket: %1$s</string>
+    <string name="h2_add_shortcut">Verknüpfung hinzufügen?</string>
     <string name="h2_delete_group">Sind Sie sicher, dass Sie die Gruppe entfernen möchten?</string>
     <string name="h2_rename_app">App umbenennen</string>
+    <string name="h2_remove_shortcut">Verknüpfung entfernen?</string>
     <string name="h2_select_group">Gruppe auswählen</string>
     <string name="h3_apps">Anwendungen</string>
     <string name="h3_background">Hintergrund</string>
@@ -77,8 +82,6 @@
     <string name="multi_select_move_to_group">In Gruppe verschieben</string>
     <string name="new_group_header">------ Neue Gruppe</string>
     <string name="new_group_header_count">------ Neue Gruppe %1$d</string>
-    <string name="privacy_space_row_locked"></string>
-    <string name="privacy_space_row_unlocked"></string>
     <string name="radio_background_wallpaper">Hintergrundbild</string>
     <string name="radio_celsius">Celsius</string>
     <string name="radio_clock_12">12-Stunden-Format (AM/PM)</string>
@@ -107,17 +110,17 @@
     <string name="toast_no_clock_app_found">Keine Uhr-App gefunden</string>
     <string name="toast_no_date_app_found">Keine Datums-App gefunden</string>
     <string name="toast_no_icon_pack_found">Kein kompatibles Icon-Paket gefunden</string>
+    <string name="toast_pin_removed">PIN entfernt und Einstellungen entsperrt</string>
     <string name="toast_pin_saved">PIN gespeichert</string>
-    <string name="toast_pin_too_short">PIN muss mindestens 1 Ziffer lang sein</string>
     <string name="toast_reset_done">Zurücksetzen abgeschlossen</string>
     <string name="toast_reset_failed">Zurücksetzen fehlgeschlagen</string>
+    <string name="toast_shortcut_added">%1$s hinzugefügt</string>
+    <string name="toast_unable_add_shortcut">Verknüpfung konnte nicht hinzugefügt werden</string>
     <string name="toast_select_target_group">Wählen Sie eine Zielgruppe aus</string>
     <string name="toast_unable_launch_app">App konnte nicht geöffnet werden</string>
     <string name="toast_unable_open_settings">Launcher-Einstellungen konnten nicht geöffnet werden</string>
     <string name="toast_unable_open_wallpaper_app">Keine Wallpaper-App verfügbar</string>
+    <string name="toast_unable_remove_shortcut">Verknüpfung konnte nicht entfernt werden</string>
     <string name="unit_celsius">C</string>
     <string name="unit_fahrenheit">F</string>
-    <string name="checkbox_multi_column"></string>
-    <string name="checkbox_show_api_indicators"></string>
-    <string name="checkbox_show_app_size"></string>
 </resources>

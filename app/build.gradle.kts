@@ -15,7 +15,7 @@ android {
         applicationId = "com.rama.mako"
         minSdk = 21
         targetSdk = 37
-        versionCode = 48
+        versionCode = 49
         versionName = "$currentYear.$versionCode"
     }
 
@@ -99,6 +99,7 @@ androidComponents {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation("androidx.activity:activity-ktx:1.9.3")
+    implementation("androidx.recyclerview:recyclerview:1.4.0")
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation(project(":bohio"))
 

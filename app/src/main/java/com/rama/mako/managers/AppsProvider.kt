@@ -2,25 +2,33 @@ package com.rama.mako.managers
 
 import android.content.Context
 import android.content.pm.LauncherActivityInfo
-import android.os.UserHandle
 import android.content.pm.LauncherApps
+import android.content.pm.ShortcutInfo
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.os.UserHandle
 import android.os.UserManager
 import java.io.File
 
 class AppsProvider(private val context: Context) {
 
-    data class AppEntry(
+    sealed class AppEntry(
         val packageName: String,
         val label: String,
         val userHandle: UserHandle,
-        val activityInfo: LauncherActivityInfo,
         val profileInitial: String?
     ) {
         val isWorkProfile: Boolean = userHandle.hashCode() != 0
         val displayLabel: String = label
+    }
 
+    class ActivityEntry(
+        packageName: String,
+        label: String,
+        userHandle: UserHandle,
+        val activityInfo: LauncherActivityInfo,
+        profileInitial: String?
+    ) : AppEntry(packageName, label, userHandle, profileInitial) {
         // ApplicationInfo.minSdkVersion only exists starting API 24 (N).
         val minSdkVersion: Int
             get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -31,13 +39,23 @@ class AppsProvider(private val context: Context) {
             get() = activityInfo.applicationInfo.targetSdkVersion
     }
 
+    class ShortcutEntry(
+        packageName: String,
+        label: String,
+        userHandle: UserHandle,
+        profileInitial: String?,
+        val shortcutId: String,
+        val shortcutInfo: ShortcutInfo,
+        val isPinned: Boolean = false
+    ) : AppEntry(packageName, label, userHandle, profileInitial)
+
     private val launcherApps =
         context.getSystemService(Context.LAUNCHER_APPS_SERVICE) as LauncherApps
     private val iconCache = mutableMapOf<String, Drawable>()
     private val appSizeCache = mutableMapOf<String, Long>()
     private val userManager = context.getSystemService(Context.USER_SERVICE) as UserManager
 
-    fun getAll(): List<AppEntry> {
+    fun getAll(includeShortcuts: Boolean = true): List<AppEntry> {
         val realApps = userManager.userProfiles.flatMap { userHandle ->
             val profileInitial = getProfileInitial(userHandle)
 
@@ -49,8 +67,8 @@ class AppsProvider(private val context: Context) {
                 emptyList()
             }
 
-            activities.map { info ->
-                AppEntry(
+            val appEntries = activities.map { info ->
+                ActivityEntry(
                     packageName = info.applicationInfo.packageName,
                     label = info.label.toString(),
                     userHandle = userHandle,
@@ -58,6 +76,19 @@ class AppsProvider(private val context: Context) {
                     profileInitial = profileInitial
                 )
             }
+
+            if (!includeShortcuts) {
+                return@flatMap appEntries
+            }
+
+            // Used to prefix shortcut labels with their parent app's name, e.g. "Clock: Timer".
+            val appLabelsByPackage = activities
+                .groupBy { it.applicationInfo.packageName }
+                .mapValues { (_, infos) -> infos.first().label.toString() }
+
+            val shortcutEntries = getShortcutEntries(userHandle, profileInitial, appLabelsByPackage)
+
+            appEntries + shortcutEntries
         }
 
         return realApps
@@ -65,22 +96,29 @@ class AppsProvider(private val context: Context) {
 
     fun launch(app: AppEntry): Boolean {
         return try {
-            launcherApps.startMainActivity(
-                app.activityInfo!!.componentName,
-                app.userHandle,
-                null,
-                null
-            )
+            when (app) {
+                is ActivityEntry -> launcherApps.startMainActivity(
+                    app.activityInfo.componentName,
+                    app.userHandle,
+                    null,
+                    null
+                )
+
+                is ShortcutEntry -> {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return false
+                    launcherApps.startShortcut(app.shortcutInfo, null, null)
+                }
+            }
             true
         } catch (e: Exception) {
             false
         }
     }
 
-    fun openAppDetails(app: AppEntry): Boolean {
+    fun openAppDetails(app: ActivityEntry): Boolean {
         return try {
             launcherApps.startAppDetailsActivity(
-                app.activityInfo!!.componentName,
+                app.activityInfo.componentName,
                 app.userHandle,
                 null,
                 null
@@ -92,16 +130,56 @@ class AppsProvider(private val context: Context) {
     }
 
     fun getIcon(app: AppEntry): Drawable {
-        val key = "${app.packageName}:${app.userHandle.hashCode()}"
-        return iconCache.getOrPut(key) {
-            app.activityInfo!!.getIcon(context.resources.displayMetrics.densityDpi)
+        return iconCache.getOrPut(appCacheKey(app)) {
+            when (app) {
+                is ActivityEntry ->
+                    app.activityInfo.getIcon(context.resources.displayMetrics.densityDpi)
+
+                is ShortcutEntry -> {
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                        context.packageManager.defaultActivityIcon
+                    } else {
+                        launcherApps.getShortcutIconDrawable(
+                            app.shortcutInfo,
+                            context.resources.displayMetrics.densityDpi
+                        ) ?: context.packageManager.defaultActivityIcon
+                    }
+                }
+            }
+        }
+    }
+
+    fun unpinShortcut(shortcut: ShortcutEntry): Boolean {
+        if (!hasShortcutHostPermission()) return false
+        return try {
+            val query = LauncherApps.ShortcutQuery().apply {
+                setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED)
+                setPackage(shortcut.packageName)
+            }
+            val remainingIds = launcherApps
+                .getShortcuts(query, shortcut.userHandle)
+                .orEmpty()
+                .asSequence()
+                .map { it.id }
+                .filter { it != shortcut.shortcutId }
+                .toList()
+
+            launcherApps.pinShortcuts(
+                shortcut.packageName,
+                remainingIds,
+                shortcut.userHandle
+            )
+            iconCache.remove(appCacheKey(shortcut))
+            true
+        } catch (e: Exception) {
+            false
         }
     }
 
     // Size on disk of the installed APK(s) (base + splits). Cached since it
     // requires file stat calls and only changes when an app is updated.
-    fun getAppSizeBytes(app: AppEntry): Long {
-        val key = "${app.packageName}:${app.userHandle.hashCode()}"
+    fun getAppSizeBytes(app: ActivityEntry): Long {
+        val key = appCacheKey(app)
         return appSizeCache.getOrPut(key) {
             runCatching {
                 val info = app.activityInfo.applicationInfo
@@ -113,6 +191,58 @@ class AppsProvider(private val context: Context) {
             }.getOrDefault(0L)
         }
     }
+
+    fun hasShortcutHostPermission(): Boolean =
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                launcherApps.hasShortcutHostPermission()
+
+    private fun getShortcutEntries(
+        userHandle: UserHandle,
+        profileInitial: String?,
+        appLabelsByPackage: Map<String, String>
+    ): List<ShortcutEntry> {
+        if (!hasShortcutHostPermission()) return emptyList()
+
+        val query = LauncherApps.ShortcutQuery().apply {
+            setQueryFlags(
+                LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST or
+                        LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC or
+                        LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED
+            )
+        }
+        return runCatching {
+            launcherApps.getShortcuts(query, userHandle).orEmpty().map { shortcut ->
+                val shortcutId = shortcut.id
+                val shortcutLabel = shortcut.shortLabel?.toString()
+                    ?.ifBlank { null }
+                    ?: shortcut.longLabel?.toString()
+                        ?.ifBlank { null }
+                    ?: shortcutId
+                val appLabel = appLabelsByPackage[shortcut.`package`]
+                val combinedLabel = if (appLabel != null) {
+                    "$appLabel: $shortcutLabel"
+                } else {
+                    shortcutLabel
+                }
+                ShortcutEntry(
+                    packageName = shortcut.`package`,
+                    label = combinedLabel,
+                    userHandle = userHandle,
+                    profileInitial = profileInitial,
+                    shortcutId = shortcutId,
+                    shortcutInfo = shortcut,
+                    isPinned = shortcut.isPinned
+                )
+            }
+        }.getOrDefault(emptyList())
+    }
+
+    private fun appCacheKey(app: AppEntry): String =
+        when (app) {
+            is ActivityEntry -> "${app.packageName}:${app.userHandle.hashCode()}"
+            is ShortcutEntry ->
+                "shortcut:${app.packageName}:${app.shortcutId}:${app.userHandle.hashCode()}"
+        }
 
     fun getPrivateProfileHandle(): UserHandle? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) return null

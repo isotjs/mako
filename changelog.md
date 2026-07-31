@@ -1,5 +1,10 @@
 # Changelog
 
+## 49
+
+- Show PWAs
+- Option for show app shortcuts
+
 ## 48
 
 - Migrating double tap functionality to a separated module out of mako

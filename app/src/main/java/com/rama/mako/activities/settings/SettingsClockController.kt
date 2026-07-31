@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.widget.*
 import com.rama.mako.R
 import com.rama.mako.activities.SettingsActivity
+import com.rama.mako.managers.AppsProvider
 import com.rama.mako.managers.PrefsManager
 import com.rama.bohio.managers.ThemeManager
 import com.rama.bohio.util.UiActions
@@ -57,7 +58,8 @@ class SettingsClockController(private val activity: SettingsActivity) {
 
         val listView = dialogView.findViewById<ListView>(R.id.app_list)
         val closeBtn = dialogView.findViewById<Button>(R.id.close_button)
-        val apps = appsProvider.getAll().sortedBy { it.label.lowercase() }
+        val apps = appsProvider.getAll()
+            .sortedBy { it.label.lowercase() }
 
         val adapter = object : BaseAdapter() {
             override fun getCount() = apps.size
@@ -82,7 +84,7 @@ class SettingsClockController(private val activity: SettingsActivity) {
         listView.setOnItemClickListener { _, itemView, position, _ ->
             itemView.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP)
             val selectedApp = apps[position]
-            prefs.setClockApp(selectedApp.packageName)
+            prefs.setClockApp(PrefsManager.FileKeys.appKey(selectedApp))
             Toast.makeText(
                 activity,
                 activity.getString(R.string.toast_app_selected, selectedApp.label),

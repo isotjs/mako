@@ -21,9 +21,10 @@ import android.widget.TextView
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.LinearLayout
+import android.widget.Space
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.recyclerview.widget.RecyclerView
 import com.rama.bohio.R as BohioR
 import com.rama.mako.CsActivity
 import com.rama.mako.R
@@ -41,7 +42,8 @@ class MainActivity : CsActivity() {
     private lateinit var timeText: TextView
     private lateinit var dateText: TextView
     private lateinit var batteryText: TextView
-    private lateinit var appListContainer: LinearLayout
+    private lateinit var appList: RecyclerView
+    private lateinit var homeHeader: View
 
     private lateinit var clockManager: ClockManager
     private lateinit var batteryManager: BatteryManager
@@ -142,10 +144,12 @@ class MainActivity : CsActivity() {
         homeBackgroundManager = HomeBackgroundManager(this)
         applyHomeBackground(force = true)
 
-        timeText = findViewById(R.id.time)
-        dateText = findViewById(R.id.date)
-        batteryText = findViewById(R.id.battery)
-        appListContainer = findViewById(R.id.app_list_container)
+        appList = findViewById(R.id.app_list)
+        homeHeader = findViewById(R.id.apps_layout)
+
+        timeText = homeHeader.findViewById(R.id.time)
+        dateText = homeHeader.findViewById(R.id.date)
+        batteryText = homeHeader.findViewById(R.id.battery)
 
         clockManager = ClockManager(timeText, dateText, this)
         clockManager.start()
@@ -161,7 +165,7 @@ class MainActivity : CsActivity() {
         appsProvider = AppsProvider(this)
         appListManager = AppListManager(
             this,
-            appListContainer,
+            appList,
             appsProvider
         ) {
             if (isSearchExpanded) {
@@ -170,7 +174,7 @@ class MainActivity : CsActivity() {
         }
         appListManager.setup()
 
-        lockButton = findViewById(R.id.lock_btn)
+        lockButton = homeHeader.findViewById(R.id.lock_btn)
         lockButtonIcon = lockButton.findViewById(R.id.lock_icon)
 
         updateLockButton()
@@ -185,11 +189,32 @@ class MainActivity : CsActivity() {
 
         timeText.setTextColor(palette.h1)
 
-        val appLayout = findViewById<LinearLayout>(R.id.apps_layout)
-        appLayout.setOnLongClickListener {
+        val openSettingsOnLongPress = View.OnLongClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
             true
         }
+        homeHeader.setOnLongClickListener(openSettingsOnLongPress)
+
+        val emptySpaceLongPressDetector = GestureDetector(
+            this,
+            object : GestureDetector.SimpleOnGestureListener() {
+                override fun onDown(event: MotionEvent): Boolean = true
+
+                override fun onLongPress(event: MotionEvent) {
+                    val child = appList.findChildViewUnder(event.x, event.y)
+                    if (child == null || child is Space) {
+                        appList.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                        startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
+                    }
+                }
+            }
+        )
+        appList.addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
+            override fun onInterceptTouchEvent(view: RecyclerView, event: MotionEvent): Boolean {
+                emptySpaceLongPressDetector.onTouchEvent(event)
+                return false
+            }
+        })
 
         initSearchbar()
 
@@ -217,7 +242,7 @@ class MainActivity : CsActivity() {
 
     private fun initSearchbar() {
         searchField = findViewById(R.id.search_field)
-        searchIcon = findViewById(R.id.search_icon)
+        searchIcon = homeHeader.findViewById(R.id.search_icon)
         clearBtn = findViewById(R.id.clear_field)
 
         searchField.visibility = View.GONE
@@ -356,9 +381,9 @@ class MainActivity : CsActivity() {
         isSearchBarAlwaysVisible = prefs.isSearchBarAlwaysVisible()
         timeText.visibility =
             if (prefs.getClockFormat() != PrefsManager.ClockFormat.NONE) View.VISIBLE else View.GONE
-        findViewById<View>(R.id.date_row).visibility =
+        homeHeader.findViewById<View>(R.id.date_row).visibility =
             if (prefs.isDateVisible()) View.VISIBLE else View.GONE
-        findViewById<View>(R.id.battery_row).visibility =
+        homeHeader.findViewById<View>(R.id.battery_row).visibility =
             if (prefs.isBatteryVisible()) View.VISIBLE else View.GONE
         findViewById<View>(R.id.searchbar).visibility =
             if (searchVisible) View.VISIBLE else View.GONE
@@ -366,11 +391,19 @@ class MainActivity : CsActivity() {
             if (searchVisible && !isSearchBarAlwaysVisible) View.VISIBLE else View.GONE
     }
 
+    private fun resolveConfiguredApp(storedValue: String): AppsProvider.AppEntry? {
+        if (storedValue.isEmpty()) return null
+        val allApps = appsProvider.getAll()
+        return allApps.firstOrNull { PrefsManager.FileKeys.appKey(it) == storedValue }
+            ?: allApps.filterIsInstance<AppsProvider.ActivityEntry>()
+                .firstOrNull { it.packageName == storedValue }
+    }
+
     // --- Open date app ---
     private fun openDateApp() {
         val packageName = prefs.getDateApp()
         if (packageName.isNotEmpty()) {
-            val app = appsProvider.getAll().firstOrNull { it.packageName == packageName }
+            val app = resolveConfiguredApp(packageName)
             if (app != null) {
                 if (!appsProvider.launch(app)) {
                     Toast.makeText(
@@ -388,7 +421,7 @@ class MainActivity : CsActivity() {
     private fun openSystemClock() {
         val packageName = prefs.getClockApp()
         if (packageName.isNotEmpty()) {
-            val app = appsProvider.getAll().firstOrNull { it.packageName == packageName }
+            val app = resolveConfiguredApp(packageName)
             if (app != null) {
                 if (!appsProvider.launch(app)) {
                     Toast.makeText(
